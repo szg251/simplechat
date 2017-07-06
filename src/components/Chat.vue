@@ -1,23 +1,27 @@
 <template>
   <div class="hello">
-    <h1>Chat</h1>
-    <div class="col-xs-5 col-sm-4 col-md-3">
-      <div v-for="message in messages"  :class="{msgFromOther: message.user != currentUser}">
-        <h5>{{message.user}}<small>{{message.time}}</small></h5>
-        <small>{{message.text}}</small>
-        <hr/>
-      </div>
-      <form>
-        <div class="input-group">
-            <input class="form-control" type="text"
-              placeholder="メッセージを入力してください" v-model="newMsg">
-            <span class="input-group-btn">
-              <input class="btn btn-primary" type="submit"
-                value="送信" v-on:click="addMsg">
-            </span>
-        </div>
-      </form>
+    <div class="form-group">
+      <button class="btn btn-primary" v-on:click="toggleChat">Show</button>
     </div>
+    <transition name="fade">
+      <div v-if="isChatVisible" class="col-xs-5 col-sm-4 col-md-3 well">
+        <div v-for="message in messages"  :class="{msgFromOther: message.user != currentUser}">
+          <h5>{{message.user}}<small>{{message.time}}</small></h5>
+          <small>{{message.text}}</small>
+          <hr/>
+        </div>
+        <form>
+          <div class="input-group">
+              <input class="form-control" type="text"
+                placeholder="メッセージを入力してください" v-model="newMsg">
+              <span class="input-group-btn">
+                <input class="btn btn-primary" type="submit"
+                  value="送信" v-on:click="addMsg">
+              </span>
+          </div>
+        </form>
+      </div>
+    </transition>
 
   </div>
 </template>
@@ -43,7 +47,8 @@ export default {
         user: 'Natsuko',
         text: 'Mizu?',
         time: new Date().toLocaleString()
-      }]
+      }],
+      isChatVisible: false
     }
   },
   methods: {
@@ -55,6 +60,9 @@ export default {
         time: new Date().toLocaleString()
       });
       this.newMsg = '';
+    },
+    toggleChat: function() {
+      this.isChatVisible = !this.isChatVisible;
     }
   }
 }
@@ -82,5 +90,8 @@ a {
 
 .msgFromOther {
   text-align: right;
+}
+.fade-enter {
+
 }
 </style>
