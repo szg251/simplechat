@@ -1,8 +1,9 @@
 <template>
   <div class="hello">
-    <transition name="fade">
+    <transition name="slide">
       <div v-if="isChatVisible" class="col-xs-5 col-sm-4 col-md-3 chat-panel">
-        <div v-for="message in messages"  :class="{msgFromOther: message.user != currentUser}" class="well">
+        <div v-for="message in messages" class="well"
+          :class="{msgFromOther: message.user != currentUser}">
           <h5>{{message.user}}<small>{{message.time}}</small></h5>
           <small>{{message.text}}</small>
         </div>
@@ -82,11 +83,19 @@ export default {
   .msgFromOther {
     text-align: right;
   }
-  .fade-enter {
-    opacity: 0;
+  .fade-enter-active, .fade-leave-active {
+    transition: all .5s
   }
-
-  .fade-enter-to {
-    opacity: 1;
+  .fade-enter, .fade-leave-to {
+    opacity: 0
+  }
+  .slide-enter-active, .slide-leave-active {
+    transition: all .2s
+  }
+  .slide-enter, .slide-leave-to  {
+    transform: translateX(-100%);
+  }
+  .slide-move {
+    transition: transform 1s;
   }
 </style>
