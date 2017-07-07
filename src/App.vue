@@ -22,4 +22,9 @@ export default {
 
 <style>
   @import '../bower_components/bootstrap/dist/css/bootstrap.min.css';
+
+  .navbar {
+    height: 10vh;
+    margin-bottom: 0;
+  }
 </style>

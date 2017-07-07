@@ -1,14 +1,10 @@
 <template>
   <div class="hello">
-    <div class="form-group">
-      <button class="btn btn-primary" v-on:click="toggleChat">Show</button>
-    </div>
     <transition name="fade">
-      <div v-if="isChatVisible" class="col-xs-5 col-sm-4 col-md-3 well">
-        <div v-for="message in messages"  :class="{msgFromOther: message.user != currentUser}">
+      <div v-if="isChatVisible" class="col-xs-5 col-sm-4 col-md-3 chat-panel">
+        <div v-for="message in messages"  :class="{msgFromOther: message.user != currentUser}" class="well">
           <h5>{{message.user}}<small>{{message.time}}</small></h5>
           <small>{{message.text}}</small>
-          <hr/>
         </div>
         <form>
           <div class="input-group">
@@ -22,6 +18,7 @@
         </form>
       </div>
     </transition>
+      <button class="chat-btn btn btn-primary" v-on:click="toggleChat">{{isChatVisible ? '<' : '>'}}</button>
 
   </div>
 </template>
@@ -70,28 +67,26 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
-}
+  .chat-panel {
+    background-color: LightGray;
+    height: 90vh;
+    overflow-y: scroll;
+  }
 
-ul {
-  list-style-type: none;
-  padding: 0;
-}
+  .chat-btn {
+    height: 90vh;
+    color: white;
+    font-weight: bold;
+  }
 
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
+  .msgFromOther {
+    text-align: right;
+  }
+  .fade-enter {
+    opacity: 0;
+  }
 
-a {
-  color: #42b983;
-}
-
-.msgFromOther {
-  text-align: right;
-}
-.fade-enter {
-
-}
+  .fade-enter-to {
+    opacity: 1;
+  }
 </style>
