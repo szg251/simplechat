@@ -3,10 +3,11 @@
     <transition name="slide">
       <div v-if="isChatVisible" class="col-xs-5 col-sm-4 col-md-3 chat-panel">
         <input type="text" v-model="currentUser">
+        <input type="text" v-model="currentGroup">
 
         <div v-for="message in messages">
-          <small>{{message.time}}</small>
-          <div class="well" :class="{msgFromOther: message.user != currentUser}">
+          <small>{{message.user}} - {{message.time}}</small>
+          <div :class="{msgFromOther: message.user != currentUser}">
             {{message.text}}
           </div>
         </div>
