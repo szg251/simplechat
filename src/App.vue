@@ -8,8 +8,10 @@
     <router-view></router-view>
   </div>
 </template>
+<script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 
 <script>
+
 export default {
   name: 'app',
   data () {

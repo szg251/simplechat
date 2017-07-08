@@ -80,6 +80,13 @@ devMiddleware.waitUntilValid(() => {
 })
 
 var server = app.listen(port)
+var io = require('socket.io')(server)
+
+io.sockets.on('connection', function(socket) {
+  socket.join(function(user) {
+    console.log('Socket.io connected: ' + socket.id);
+  })
+})
 
 module.exports = {
   ready: readyPromise,
