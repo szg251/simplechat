@@ -28,40 +28,36 @@
     </transition>
   </div>
 </template>
-<script src=""></script>
 
 <script>
-  var io = require('socket.io-client');
-  var socket = io.connect('http://localhost:3333');
-console.log('logging');
+const io = require('socket.io-client');
+const socket = io.connect();
+
 export default {
   name: 'chat',
   data () {
     return {
       newMsg: '',
       currentUser: 'Gergo',
-      messages: [{
-        user: 'Natsuko',
-        text: 'Szia Gergo!',
-        time: new Date().toLocaleString()
-      },
-      {
-        user: 'Gergo',
-        text: 'Szevasz!',
-        time: new Date().toLocaleString()
-      },
-      {
-        user: 'Natsuko',
-        text: 'Mizu?',
-        time: new Date().toLocaleString()
-      }],
+      messages: [],
       isChatVisible: false
     }
+  },
+  created: function() {
+
+    socket.on('newMsg', (data) => {
+      this.messages.push(data)
+    })
   },
   methods: {
     addMsg: function (e) {
       e.preventDefault();
       this.messages.push({
+        user: this.currentUser,
+        text: this.newMsg,
+        time: new Date().toLocaleString()
+      });
+      socket.emit('msgSent', {
         user: this.currentUser,
         text: this.newMsg,
         time: new Date().toLocaleString()
