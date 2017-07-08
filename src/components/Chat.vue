@@ -2,6 +2,7 @@
   <div class="hello">
     <transition name="slide">
       <div v-if="isChatVisible" class="col-xs-5 col-sm-4 col-md-3 chat-panel">
+        <input type="text" v-model="currentUser">
 
         <div v-for="message in messages">
           <small>{{message.time}}</small>
@@ -39,29 +40,31 @@ export default {
     return {
       newMsg: '',
       currentUser: 'Gergo',
+      currentGroup: 'NG',
       messages: [],
       isChatVisible: false
     }
   },
   created: function() {
+    socket.emit('joinGroup', this.currentGroup);
+    console.log('joined on: ' + this.currentGroup);
 
     socket.on('newMsg', (data) => {
-      this.messages.push(data)
+      this.messages.push(data);
     })
   },
   methods: {
     addMsg: function (e) {
       e.preventDefault();
-      this.messages.push({
+      var newMsg = {
         user: this.currentUser,
+        group: this.currentGroup,
         text: this.newMsg,
         time: new Date().toLocaleString()
-      });
-      socket.emit('msgSent', {
-        user: this.currentUser,
-        text: this.newMsg,
-        time: new Date().toLocaleString()
-      });
+      }
+
+      this.messages.push(newMsg);
+      socket.emit('msgSent', newMsg);
       this.newMsg = '';
     },
     toggleChat: function() {

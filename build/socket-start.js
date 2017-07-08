@@ -1,4 +1,8 @@
 
+//  Dependencies
+
+var logger = require('./logger');
+
 module.exports = exports = SocketStart;
 
 function SocketStart(io) {
@@ -6,17 +10,23 @@ function SocketStart(io) {
   io.sockets.on('connection', onConnect)
 
   function onConnect(socket) {
-      socket.on('disconnect', onDisconnect),
-      socket.on('msgSent', onMsgSent)
+    logger('Connected: ' + socket.id);
+    socket.on('disconnect', onDisconnect)
+    socket.on('msgSent', onMsgSent)
+    socket.on('joinGroup', joinGroup)
   }
 
   function onDisconnect() {
-//    console.log('Disconnected: ' + this.id);
+    logger('Disconnected: ' + this.id);
   }
 
   function onMsgSent(data) {
-//    console.log(data.text);
-    io.sockets.emit('newMsg', data);
+    this.broadcast.to(data.group).emit('newMsg', data);
+  }
+
+  function joinGroup(data) {
+    this.join(data);
+    logger(this.id + ' joined group ' + data);
   }
 
 }
