@@ -81,7 +81,7 @@ devMiddleware.waitUntilValid(() => {
 
 var server = app.listen(port)
 var io = require('socket.io')(server)
-require('./socket.conf')(io)
+require('./socket-start')(io)
 
 module.exports = {
   ready: readyPromise,
