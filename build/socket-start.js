@@ -2,7 +2,9 @@
 //  Dependencies
 
 var logger = require('./logger');
+var Model = require('./model');
 
+var model = new Model();
 module.exports = exports = SocketStart;
 
 function SocketStart(io) {
@@ -21,6 +23,7 @@ function SocketStart(io) {
   }
 
   function onMsgSent(data) {
+    model.setMessage(data);
     this.broadcast.to(data.group).emit('newMsg', data);
   }
 
