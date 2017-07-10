@@ -13,13 +13,12 @@ function Model() {
 
 
 Model.prototype.getMessages = function() {
-  Message.find({}, function() {
+  return Message.find({}, function(err) {
     if (err) {
       throw err;
       return false;
     }
-    logger('Messages retrieved.')
-    return true;
+    logger('Messages retrieved.');
   })
 }
 
