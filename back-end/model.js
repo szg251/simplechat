@@ -3,17 +3,19 @@ var Message = require('./schemas/message');
 var logger = require('./logger');
 
 
-module.exports = exports = Model;
+module.exports = exports = Message;
 
 function Model() {
 
   mongoose.connect('mongodb://localhost/vueapp');
-  logger('Mongoose connected');
+  mongoose.on('connect', function() {
+    logger('Mongoose connected');
+  })
 }
 
 
 Model.prototype.getMessages = function() {
-  return Message.find({}, function(err) {
+  Message.find({},function(err, result) {
     if (err) {
       throw err;
       return false;

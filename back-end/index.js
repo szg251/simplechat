@@ -1,13 +1,11 @@
 const express = require('express');
 const app = express();
-const Model = require('./model')
-
-var model =　new Model();
+const Message = require('./schemas/message')
 
 app.get('/', function(req, res) {
-  model.getMessages().then(console.log(results));
-  console.log();
-  res.send(model.getMessages());
+  Message.find({}, function(result) {
+    res.send(result);
+  });
 });
 
 
