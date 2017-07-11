@@ -22,6 +22,8 @@ db.on('error', function(err) {
   logger('Database error: ' + err);
 });
 
+// Routing
+
 app.get('/messages', function(req, res) {
   Message.find(function(err, result) {
     if (err) {
@@ -41,4 +43,14 @@ require('./socket-start')(io)
 var testobject = {
   name: 'testobject',
   value: '1122'
+}
+
+/*
+var sessionCard = sessions.createSession();
+sessions.pushData(sessionCard, {key: 'key', data: 'data'});
+getData();
+setTimeout(getData, 7000)
+
+function getData() {
+  console.log(sessions.pullData(sessionCard, 'key'));
 }

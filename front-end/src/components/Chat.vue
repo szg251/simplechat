@@ -34,7 +34,8 @@
 <script>
 var axios = require('axios')
 var io = require('socket.io-client')
-var socket = io.connect('http://localhost:3001')
+var routes = require('../../config/routes')
+var socket = io.connect(routes.socketRoute)
 
 export default {
   name: 'chat',
@@ -55,7 +56,7 @@ export default {
     })
 
     console.log('axios::');
-    axios.get('http://localhost:3001/messages')
+    axios.get(routes.apiRoute + '/messages', this.currentGroup)
       .then(response => {
         this.messages = response.data;
       })
