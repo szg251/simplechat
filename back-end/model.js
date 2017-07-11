@@ -2,14 +2,16 @@ var mongoose = require('mongoose');
 var Message = require('./schemas/message');
 var logger = require('./logger');
 
-
-module.exports = exports = Message;
+module.exports = exports = Model;
 
 function Model() {
-
-  mongoose.connect('mongodb://localhost/vueapp');
-  mongoose.on('connect', function() {
+  mongoose.connect('mongodb://localhost/vueapp', { useMongoClient: true });
+  var db = mongoose.connection;
+  db.once('open', function() {
     logger('Mongoose connected');
+  })
+  db.on('error', function(err) {
+    logger(err);
   })
 }
 

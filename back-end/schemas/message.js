@@ -8,6 +8,6 @@ var messageSchema = new Schema({
   time: String
 })
 
-var Message = mongoose.model('Message', messageSchema);
+var Message = mongoose.model('message', messageSchema);
 
 module.exports = Message;

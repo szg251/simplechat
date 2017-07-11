@@ -1,9 +1,16 @@
 const express = require('express');
 const app = express();
-const Message = require('./schemas/message')
+const Model = require('./model');
+const Message = require('./schemas/message');
+
+var model = new Model();
 
 app.get('/', function(req, res) {
-  Message.find({}, function(result) {
+  Message.find(function(err, result) {
+    if (err) {
+      throw err;
+      return false;
+    }
     res.send(result);
   });
 });
