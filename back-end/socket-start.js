@@ -1,10 +1,9 @@
 
 //  Dependencies
 
-var logger = require('./logger');
-var Model = require('./model');
+const logger = require('./logger');
+const Message = require('./schemas/message')
 
-var model = new Model();
 module.exports = exports = SocketStart;
 
 function SocketStart(io) {
@@ -23,7 +22,8 @@ function SocketStart(io) {
   }
 
   function onMsgSent(data) {
-    model.setMessage(data);
+    var message = new Message(data);
+    message.save();
     this.broadcast.to(data.group).emit('newMsg', data);
   }
 

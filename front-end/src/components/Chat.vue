@@ -32,8 +32,9 @@
 </template>
 
 <script>
-const io = require('socket.io-client');
-const socket = io.connect();
+var axios = require('axios')
+var io = require('socket.io-client')
+var socket = io.connect('http://localhost:3001')
 
 export default {
   name: 'chat',
@@ -48,11 +49,16 @@ export default {
   },
   created: function() {
     socket.emit('joinGroup', this.currentGroup);
-    console.log('joined on: ' + this.currentGroup);
 
     socket.on('newMsg', (data) => {
       this.messages.push(data);
     })
+
+    console.log('axios::');
+    axios.get('http://localhost:3001/messages')
+      .then(response => {
+        this.messages = response.data;
+      })
   },
   methods: {
     addMsg: function (e) {

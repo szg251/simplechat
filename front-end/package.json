@@ -10,6 +10,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "axios": "^0.16.2",
     "mongoose": "^4.11.0",
     "socket.io": "^2.0.3",
     "vue": "^2.3.3",
