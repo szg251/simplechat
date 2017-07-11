@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const logger = require('./logger');
 const Message = require('./schemas/message');
 const socketio = require('socket.io');
+const Sessions =　require('./session');
+const sessions = new Sessions();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -15,7 +17,7 @@ var db = mongoose.connection;
 
 db.once('open', function() {
   logger('Mongoose connected');
-});
+})
 db.on('error', function(err) {
   logger('Database error: ' + err);
 });
@@ -26,7 +28,7 @@ app.get('/messages', function(req, res) {
       throw err;
       return false;
     }
-    
+
     res.header("Access-Control-Allow-Origin", "*");
     res.json(result);
   });
