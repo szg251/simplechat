@@ -1,12 +1,14 @@
-const express = require('express');
-const app = express();
+const express   = require('express');
+const app       = express();
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const logger = require('./logger');
-const Message = require('./schemas/message');
-const socketio = require('socket.io');
-const Sessions =　require('./session');
-const sessions = new Sessions();
+const logger    = require('./logger');
+
+const mongoose  = require('mongoose');
+const Message   = require('./schemas/message');
+const User      = require('./schemas/user');
+const socketio  = require('socket.io');
+const Sessions  =　require('./session');
+const sessions  = new Sessions();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -40,12 +42,8 @@ const server = app.listen('3001');
 const io = socketio(server);
 require('./socket-start')(io)
 
-var testobject = {
-  name: 'testobject',
-  value: '1122'
-}
 
-/*
+/* FOR TESTING SESSIONS
 var sessionCard = sessions.createSession();
 sessions.pushData(sessionCard, {key: 'key', data: 'data'});
 getData();
@@ -54,3 +52,4 @@ setTimeout(getData, 7000)
 function getData() {
   console.log(sessions.pullData(sessionCard, 'key'));
 }
+*/

@@ -12,6 +12,8 @@ back-end/npm-debug.log*
 back-end/yarn-debug.log*
 back-end/yarn-error.log*
 
+data
+
 # Editor directories and files
 .idea
 *.suo
