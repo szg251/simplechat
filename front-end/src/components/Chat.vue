@@ -55,8 +55,7 @@ export default {
       this.messages.push(data);
     })
 
-    console.log('axios::');
-    axios.get(routes.apiRoute + '/messages', this.currentGroup)
+    axios.get(routes.apiRoute + '/messages', {params: {group: this.currentGroup}})
       .then(response => {
         this.messages = response.data;
       })
@@ -68,7 +67,7 @@ export default {
         user: this.currentUser,
         group: this.currentGroup,
         text: this.newMsg,
-        time: new Date().toLocaleString()
+        time: new Date()
       }
 
       this.messages.push(newMsg);

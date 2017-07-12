@@ -1,14 +1,14 @@
-const express   = require('express');
-const app       = express();
-const bodyParser = require('body-parser');
-const logger    = require('./logger');
+const express     = require('express');
+const app         = express();
+const bodyParser  = require('body-parser');
+const logger      = require('./logger');
 
-const mongoose  = require('mongoose');
-const Message   = require('./schemas/message');
-const User      = require('./schemas/user');
-const socketio  = require('socket.io');
-const Sessions  =　require('./session');
-const sessions  = new Sessions();
+const mongoose    = require('mongoose');
+const Message     = require('./schemas/message');
+const User        = require('./schemas/user');
+const socketio    = require('socket.io');
+const Sessions    = require('./session');
+const sessions    = new Sessions();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -27,7 +27,7 @@ db.on('error', function(err) {
 // Routing
 
 app.get('/messages', function(req, res) {
-  Message.find(function(err, result) {
+  Message.find({group: req.query.group}, function(err, result) {
     if (err) {
       throw err;
       return false;
@@ -43,13 +43,12 @@ const io = socketio(server);
 require('./socket-start')(io)
 
 
-/* FOR TESTING SESSIONS
-var sessionCard = sessions.createSession();
-sessions.pushData(sessionCard, {key: 'key', data: 'data'});
-getData();
-setTimeout(getData, 7000)
 
-function getData() {
-  console.log(sessions.pullData(sessionCard, 'key'));
-}
-*/
+// var sessionCard = sessions.createSession();
+// setTimeout(function() {sessions.pushData(sessionCard, {key: 'key', data: 'data'})}, 4000);
+// getData();
+// setTimeout(getData, 7000)
+//
+// function getData() {
+//   console.log(sessions.pullData(sessionCard, 'key'));
+// }

@@ -10,7 +10,7 @@ function randomId() {
 
 function Sessions() {
   this.sessions = [];
-
+  this.sessionExpiresIn = 20 * 6000; // 20 minutes
 };
 
 /**
@@ -41,10 +41,20 @@ Sessions.prototype.createSession =　function() {
   logger('Session created: ' + sessionId);
 
   // Invalidate session when expired
-  setTimeout(function() {
-    this.sessions.splice(this.sessions.indexOf(session), 1);
-    logger('Session expired: ' + sessionId);
-  }.bind(this), 600000);
+  function invalidateSession() {
+    // Computing the remaining time before expiry
+    var updateTimeDiff = (session.updateTime.getTime() + this.sessionExpiresIn) - (new Date().getTime());
+
+    // If no time remains, invalidate, else put on waiting list
+    if (updateTimeDiff < 0) {
+      this.sessions.splice(this.sessions.indexOf(session), 1);
+      logger('Session expired: ' + sessionId);
+    } else {
+      setTimeout(invalidateSession.bind(this), updateTimeDiff + 1000);
+    }
+  }
+
+  setTimeout(invalidateSession.bind(this), this.sessionExpiresIn + 1000);
 
   return session;
 };
