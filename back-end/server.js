@@ -38,10 +38,27 @@ app.get('/messages', function(req, res) {
   });
 });
 
+app.get('/user/exists', function(req, res) {
+  User.count({userId: req.query.userId}, function(err, result) {
+    if (err) {
+      throw err;
+      return false;
+    }
+    var isExists;
+    if (result != 0) {
+      isExists = true;
+    } else {
+      isExists =　false;
+    }
+
+    res.header("Access-Control-Allow-Origin", "*");
+    res.json({result: isExists});
+  })
+})
+
 const server = app.listen('3001');
 const io = socketio(server);
 require('./socket-start')(io)
-
 
 
 // var sessionCard = sessions.createSession();
