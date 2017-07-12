@@ -1,9 +1,9 @@
 {
-  "name": "vueapp",
+  "name": "vueapp-frontend",
   "version": "1.0.0",
-  "description": "A Vue.js project",
+  "description": "Vue application (front-end)",
   "author": "Szabo Gergely",
-  "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
