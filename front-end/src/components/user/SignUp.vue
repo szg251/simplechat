@@ -49,47 +49,48 @@ export default {
       inputError: {
         user: false,
         password: false
+      },
+      isEntered: {
+        user: false,
+        pass1: false,
+        pass2: false
       }
     }
   },
-  computed: {
-    isEnteredUser: function() {return this.userId != ''},
-    isEnteredPass1: function() {return this.password1 != ''},
-    isEnteredPass2: function() {return this.password2 != ''}
-  },
   methods: {
     checkUserId: function() {
-      axios.get(routes.apiRoute + '/user/exists',
-          {params: {userId: this.userId}}).then(res => {
-            this.idExists = res.data.result;
-            })
-      this.inputError.user = !this.isEnteredUser || this.idExists;
-      // if (!this.inputEntered.user || this.idExists) {
-      //   this.inputError.user = true;
-      // } else {
-      //   this.inputError.user = false;
-      // }
+      this.isEntered.user =　true;
+      if (this.userId !== '') {
+        axios.get(routes.apiRoute + '/user/exists/' + this.userId)
+            .then(res => {
+              this.idExists = res.data.userIdExists;
+              this.inputError.user = (this.userId === '') || this.idExists;
+              })
+          } else {
+            this.inputError.user = (this.userId === '') || this.idExists;
+          }
     },
     checkPassword1: function() {
-      this.isPassInvalid = this.password1 !== this.password2;
-
+      this.inputError.password = this.isEntered.pass2 && (this.password1 !== this.password2) || (this.password1 ===　'') ;
+      this.isEntered.pass1 =　true;
     },
     checkPassword2: function() {
-      this.isPassInvalid = this.password1 !== this.password2;
+      this.inputError.password = this.isEntered.pass1 && (this.password1 !== this.password2) || (this.password1 === '');
+      this.isEntered.pass2 =　true;
 
     },
     submit: function(e) {
       e.preventDefault();
-      // if (this.password1 === this.password2
-      //       && axios.get(routes.apiRoute + '/user/exists',
-      //           {params: {userId: this.userId}}))
-      // {
-          axios.get(routes.apiRoute + '/user/signup',
-        {params: {
+      if (!this.inputError.user && !this.inputError.password
+        && this.isEntered.user && this.isEntered.pass1 && this.isEntered.pass2) {
+
+        axios.get(routes.apiRoute + '/user/signup', {
+          params: {
             userId: this.userId,
             password: this.password1
-        }})
-      // }
+          }
+        })
+       }
     }
   }
 }

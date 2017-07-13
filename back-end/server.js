@@ -39,25 +39,70 @@ app.get('/messages', function(req, res) {
   });
 });
 
-app.get('/user/exists', function(req, res) {
-  User.count({userId: req.query.userId}, function(err, result) {
+app.get('/user/exists/:userId', function(req, res) {
+  User.count({userId: req.params.userId}, function(err, result) {
     if (err) {
       throw err;
       return false;
     }
-    var isExists;
-    if (result != 0) {
-      isExists = true;
-    } else {
-      isExists =　false;
-    }
+    var userIdExists = (result != 0);
 
     res.header("Access-Control-Allow-Origin", "*");
-    res.json({result: isExists});
-  })
-})
+    res.json({userIdExists: userIdExists});
+  });
+});
 
-app.get('/user/signup', function(req, res) {
+// app.post('/user/login' function(req, res) {
+//   logger('Login request by user: ' + req.body.userId);
+//
+//   User.findOne({
+//     userId: req.body.userId,
+//     passwordHash: req.body.password
+//   }, function(err, result) {
+//     if (result !== null) {
+//
+//       // creating a session with userId
+//       var sessionCard = sessions.createSession();
+//       sessions.pushData(sessionCard, {userId: req.body.userId});
+// //      sessions.pushData(sessionCard, {userDatabaseId: newUser.id});
+//       res.status(200).json({authToken: sessionCard});
+//     });
+//   });
+// });
+
+app.post('/user/signup', function(req, res) {
+  logger('Signup request.');
+
+  res.header("Access-Control-Allow-Origin", "*");
+  if (req.body.userId != null && req.body.userId != ''
+      &&　req.body.password != null && req.body.password != '') {
+
+    User.count({userId: req.body.userId}, function(err, result) {
+      if (err) {
+        throw err;
+        return false;
+      }
+      if (result === 0 && req.query.password !== '') {
+        var newUser = new User({
+          userId: req.body.userId,
+          passwordHash: req.body.password
+        });
+        newUser.save();
+
+        // creating a session with userId
+        var sessionCard = sessions.createSession();
+        sessions.pushData(sessionCard, {userId: req.query.userId})
+        res.status(200).json({authCard: sessionCard});
+      } else {
+        res.status(400).end();
+      };
+    });
+  } else {
+    res.status(400).end();
+  }
+});
+
+app.get('/user/auth', function(req, res) {
   var sessionData = {
     sessionId: basicAuth(req).name,
     securityToken: basicAuth(req).pass
@@ -66,10 +111,8 @@ app.get('/user/signup', function(req, res) {
   var group = sessions.pullData(sessionData, 'group');
   res.json({
     user: userId,
-    group : group,
-    // name: sessionCard.sessionId,
-    // pass: sessionCard.securityToken}
-  );
+    group : group
+  });
 })
 
 const server = app.listen('3001');
