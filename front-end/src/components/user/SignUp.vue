@@ -3,7 +3,7 @@
     <form class="form-horizontal">
 
       <div class="form-group">
-        <div v-if="idExists" class="alert alert-danger">User ID exists</div>
+        <div v-if="inputError.user" class="alert alert-danger">User ID invalid</div>
         <input class="form-control" type="text"
               name="userId" placeholder="UserID"
               v-model="userId"
@@ -11,7 +11,7 @@
       </div>
 
       <div class="form-group">
-        <div v-if="isPassInvalid" class="alert alert-danger">Password doesn't match</div>
+        <div v-if="inputError.password" class="alert alert-danger">Password invalid</div>
         <input class="form-control" type="password"
               name="password1" placeholder="Password"
               v-model="password1"
@@ -44,25 +44,39 @@ export default {
       userId: '',
       password1: '',
       password2: '',
-      userIdEntered: false,
-      pass1Entered: false,
-      pass2Entered: false,
       idExists: false,
-      isPassInvalid: false
+      isPassInvalid: false,
+      inputError: {
+        user: false,
+        password: false
+      }
     }
+  },
+  computed: {
+    isEnteredUser: function() {return this.userId != ''},
+    isEnteredPass1: function() {return this.password1 != ''},
+    isEnteredPass2: function() {return this.password2 != ''}
   },
   methods: {
     checkUserId: function() {
-      this.userIdEntered = true;
-      checkIdExists();
+      axios.get(routes.apiRoute + '/user/exists',
+          {params: {userId: this.userId}}).then(res => {
+            this.idExists = res.data.result;
+            })
+      this.inputError.user = !this.isEnteredUser || this.idExists;
+      // if (!this.inputEntered.user || this.idExists) {
+      //   this.inputError.user = true;
+      // } else {
+      //   this.inputError.user = false;
+      // }
     },
     checkPassword1: function() {
-      this.pass1Entered = true;
-      checkPasswordIsSame();
+      this.isPassInvalid = this.password1 !== this.password2;
+
     },
     checkPassword2: function() {
-      this.pass2Entered = true;
-      checkPasswordIsSame();
+      this.isPassInvalid = this.password1 !== this.password2;
+
     },
     submit: function(e) {
       e.preventDefault();
@@ -77,21 +91,6 @@ export default {
         }})
       }
     }
-  }
-}
-
-function checkIdExists() {
-  axios.get(routes.apiRoute + '/user/exists',
-      {params: {userId: this.userId}}).then(res => {
-        this.idExists = res.data.result;
-        })
-}
-
-function checkPasswordIsSame() {
-  if (this.password1 !== this.password2){
-    this.isPassInvalid = true;
-  } else {
-    this.isPassInvalid =　false;
   }
 }
 </script>
