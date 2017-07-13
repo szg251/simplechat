@@ -80,16 +80,16 @@ export default {
     },
     submit: function(e) {
       e.preventDefault();
-      if (this.password1 === this.password2
-            && axios.get(routes.apiRoute + '/user/exists',
-                {params: {userId: this.userId}}))
-      {
-          axios.post(routes.apiRoute + '/user/signup',
+      // if (this.password1 === this.password2
+      //       && axios.get(routes.apiRoute + '/user/exists',
+      //           {params: {userId: this.userId}}))
+      // {
+          axios.get(routes.apiRoute + '/user/signup',
         {params: {
             userId: this.userId,
             password: this.password1
         }})
-      }
+      // }
     }
   }
 }

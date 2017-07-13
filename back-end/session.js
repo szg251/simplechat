@@ -59,11 +59,23 @@ Sessions.prototype.createSession =　function() {
   return session;
 };
 
+Sessions.prototype.isExists = function(sessionData) {
+  var isExists = false;
+  this.sessions.forEach(session => {
+    if (session.sessionId === sessionData.sessionId
+      && session.securityToken === sessionData.securityToken)
+      {
+        isExists = true;
+      }
+  })
+  return isExists
+}
+
 /**
 /*  Set data to session (returns true on success)
 **/
 Sessions.prototype.pushData = function(sessionData, data) {
-  var success;
+  var success = false;
   this.sessions.forEach(session => {
     if (session.sessionId === sessionData.sessionId
       && session.securityToken === sessionData.securityToken)

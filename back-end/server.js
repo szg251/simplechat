@@ -2,6 +2,7 @@ const express     = require('express');
 const app         = express();
 const bodyParser  = require('body-parser');
 const logger      = require('./logger');
+const basicAuth   = require('basic-auth');
 
 const mongoose    = require('mongoose');
 const Message     = require('./schemas/message');
@@ -56,10 +57,28 @@ app.get('/user/exists', function(req, res) {
   })
 })
 
+app.get('/user/signup', function(req, res) {
+  var sessionData = {
+    sessionId: basicAuth(req).name,
+    securityToken: basicAuth(req).pass
+  }
+  var userId = sessions.pullData(sessionData, 'user');
+  var group = sessions.pullData(sessionData, 'group');
+  res.json({
+    user: userId,
+    group : group,
+    // name: sessionCard.sessionId,
+    // pass: sessionCard.securityToken}
+  );
+})
+
 const server = app.listen('3001');
 const io = socketio(server);
 require('./socket-start')(io)
 
+// var sessionCard = sessions.createSession();
+// sessions.pushData(sessionCard, {key: 'user', data: 'Gergo'});
+// sessions.pushData(sessionCard, {key: 'group', data: 'NG'});
 
 // var sessionCard = sessions.createSession();
 // setTimeout(function() {sessions.pushData(sessionCard, {key: 'key', data: 'data'})}, 4000);
