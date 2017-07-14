@@ -1,12 +1,13 @@
-var mongoose = require('mongoose')
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema;
+const ObjectId = mongoose.Schema.Types.ObjectId;
 
-var userSchema = new Schema({
+const userSchema = new Schema({
   userId: {type: String, required: true, unique: true},
   passwordHash: String,
-  groups: [String]
+  groups: [{type: ObjectId, ref: 'Group'}]
 });
 
-var User = mongoose.model('user', userSchema);
+const User = mongoose.model('user', userSchema);
 
 module.exports = exports = User;

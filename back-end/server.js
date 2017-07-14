@@ -25,11 +25,24 @@ db.on('error', function(err) {
   logger('Database error: ' + err);
 });
 
-// Routing
+/**
+ *  Routing
+**/
 
+// User API
+app.post('/user/login', userLogin);
+app.post('/user/signup', userSignUp);
+// '/user/:id/exists'
+app.get('/user/exists/:userId', userExists);
+
+// Group API
 
 // '/messages/:group'
-app.get('/messages', function(req, res) {
+app.get('/messages', getMessages);
+
+// Functions for routes
+
+function getMessages(req, res) {
   Message.find({group: req.query.group}, function(err, result) {
     if (err) {
       throw err;
@@ -41,7 +54,7 @@ app.get('/messages', function(req, res) {
   });
 });
 
-app.get('/user/exists/:userId', function(req, res) {
+function userExists(req, res) {
   User.count({userId: req.params.userId}, function(err, result) {
     if (err) {
       throw err;
@@ -54,32 +67,34 @@ app.get('/user/exists/:userId', function(req, res) {
   });
 });
 
-app.post('/user/login', function(req, res) {
+
+function userLogin(req, res) {
   logger('Login request by user: ' + req.body.userId);
-  var sessionCard;
+  // If session exists, simply send it back
+  var sessionCard = sessions.getByUserId(req.body.userId);
 
-  sessionCard = sessions.getByUserId(req.body.userId);
-
- if (sessionCard == undefined) {
-   User.findOne({
-      userId: req.body.userId,
-      passwordHash: req.body.password
-    }, function(err, result) {
-      if (result !== null) {
-
-        // creating a session with userId (ISSUE: cannot see it in response)
-        sessionCard = sessions.createSession(req.body.userId);
-      }
-    });
-  }
   if (sessionCard !== undefined) {
     res.status(200).json({authCard: sessionCard});
-  } else {
-    res.status(400).end();
+    return;
   }
-});
 
-app.post('/user/signup', function(req, res) {
+  // Get from database
+  User.findOne({
+    userId: req.body.userId,
+    passwordHash: req.body.password
+  }, function(err, result) {
+
+    if (result !== null) {
+      sessionCard = sessions.createSession(req.body.userId);
+      res.status(200).json({authCard: sessionCard});
+    } else {
+      res.status(400).end();
+    }
+
+  });
+};
+
+function userSignUp(req, res) {
   logger('Signup request.');
 
   res.header("Access-Control-Allow-Origin", "*");
@@ -91,7 +106,8 @@ app.post('/user/signup', function(req, res) {
         throw err;
         return false;
       }
-      if (result === 0 && req.query.password !== '') {
+      // If UserId doesn't exists
+      if (result === 0) {
         var newUser = new User({
           userId: req.body.userId,
           passwordHash: req.body.password
@@ -108,20 +124,20 @@ app.post('/user/signup', function(req, res) {
   } else {
     res.status(400).end();
   }
-});
+};
 
-app.get('/user/auth', function(req, res) {
-  var sessionData = {
-    sessionId: basicAuth(req).name,
-    securityToken: basicAuth(req).pass
-  }
-  var userId = sessions.pullData(sessionData, 'user');
-  var group = sessions.pullData(sessionData, 'group');
-  res.json({
-    user: userId,
-    group : group
-  });
-})
+// app.get('/user/auth', function(req, res) {
+//   var sessionData = {
+//     sessionId: basicAuth(req).name,
+//     securityToken: basicAuth(req).pass
+//   }
+//   var userId = sessions.pullData(sessionData, 'user');
+//   var group = sessions.pullData(sessionData, 'group');
+//   res.json({
+//     user: userId,
+//     group : group
+//   });
+// })
 
 const server = app.listen('3001');
 const io = socketio(server);
