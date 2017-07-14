@@ -27,6 +27,8 @@ db.on('error', function(err) {
 
 // Routing
 
+
+// '/messages/:group'
 app.get('/messages', function(req, res) {
   Message.find({group: req.query.group}, function(err, result) {
     if (err) {
@@ -52,23 +54,30 @@ app.get('/user/exists/:userId', function(req, res) {
   });
 });
 
-// app.post('/user/login' function(req, res) {
-//   logger('Login request by user: ' + req.body.userId);
-//
-//   User.findOne({
-//     userId: req.body.userId,
-//     passwordHash: req.body.password
-//   }, function(err, result) {
-//     if (result !== null) {
-//
-//       // creating a session with userId
-//       var sessionCard = sessions.createSession();
-//       sessions.pushData(sessionCard, {userId: req.body.userId});
-// //      sessions.pushData(sessionCard, {userDatabaseId: newUser.id});
-//       res.status(200).json({authToken: sessionCard});
-//     });
-//   });
-// });
+app.post('/user/login', function(req, res) {
+  logger('Login request by user: ' + req.body.userId);
+  var sessionCard;
+
+  sessionCard = sessions.getByUserId(req.body.userId);
+
+ if (sessionCard == undefined) {
+   User.findOne({
+      userId: req.body.userId,
+      passwordHash: req.body.password
+    }, function(err, result) {
+      if (result !== null) {
+
+        // creating a session with userId (ISSUE: cannot see it in response)
+        sessionCard = sessions.createSession(req.body.userId);
+      }
+    });
+  }
+  if (sessionCard !== undefined) {
+    res.status(200).json({authCard: sessionCard});
+  } else {
+    res.status(400).end();
+  }
+});
 
 app.post('/user/signup', function(req, res) {
   logger('Signup request.');
@@ -90,8 +99,7 @@ app.post('/user/signup', function(req, res) {
         newUser.save();
 
         // creating a session with userId
-        var sessionCard = sessions.createSession();
-        sessions.pushData(sessionCard, {userId: req.query.userId})
+        var sessionCard = sessions.createSession(req.query.userId);
         res.status(200).json({authCard: sessionCard});
       } else {
         res.status(400).end();

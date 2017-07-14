@@ -11,12 +11,28 @@ function randomId() {
 function Sessions() {
   this.sessions = [];
   this.sessionExpiresIn = 20 * 6000; // 20 minutes
-};
+}
+
+function Session(newSession) {
+  this.sessionId = newSession.sessionId;
+  this.securityToken = newSession.securityToken;
+  this.createTime = new Date();
+  this.updateTime = new Date();
+  this.userId = newSession.userId;
+  this.storage = {};
+
+  this.getSessionCard = function() {
+    return {
+      sessionId: this.sessionId,
+      securityToken: this.securityToken
+    }
+  }
+}
 
 /**
 /*  Create a new session (returns sessionObject )
 **/
-Sessions.prototype.createSession =　function() {
+Sessions.prototype.createSession =　function(userId) {
   // Generate unique ID
   var sessionId = 1;
   var idExists;
@@ -29,13 +45,11 @@ Sessions.prototype.createSession =　function() {
   } while (idExists);
 
   // Creating new session object
-  var session = {
+  var session = new Session({
     sessionId: sessionId,
     securityToken: randomId(),
-    createTime: new Date(),
-    updateTime: new Date(),
-    storage: {}
-  }
+    userId: userId,
+  })
 
   this.sessions.push(session);
   logger('Session created: ' + sessionId);
@@ -56,8 +70,19 @@ Sessions.prototype.createSession =　function() {
 
   setTimeout(invalidateSession.bind(this), this.sessionExpiresIn + 1000);
 
-  return session;
+  return session.getSessionCard();
 };
+
+Sessions.prototype.getByUserId = function(userId) {
+  var sessionCard;
+  this.sessions.forEach(session => {
+    if (session.userId === userId){
+      sessionCard = session.getSessionCard();
+      // some kind of break
+    };
+  });
+  return sessionCard;
+}
 
 Sessions.prototype.isExists = function(sessionData) {
   var isExists = false;
