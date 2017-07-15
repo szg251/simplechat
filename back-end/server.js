@@ -1,22 +1,24 @@
 const express     = require('express');
-const app         = express();
 const bodyParser  = require('body-parser');
 const logger      = require('./logger');
 const basicAuth   = require('basic-auth');
-
 const mongoose    = require('mongoose');
-const Message     = require('./schemas/message');
-const User        = require('./schemas/user');
 const socketio    = require('socket.io');
-const Sessions    = require('./session');
-const sessions    = new Sessions();
+
+// API functions
+const userApi     = require('./api/user');
+const groupApi    = require('./api/group');
+
+const app         = express();
+
+logger('Vueapp back-end server booting...');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // DB connection
 mongoose.connect('mongodb://localhost/vueapp', { useMongoClient: true });
-var db = mongoose.connection;
+const db = mongoose.connection;
 
 db.once('open', function() {
   logger('Mongoose connected');
@@ -29,115 +31,21 @@ db.on('error', function(err) {
  *  Routing
 **/
 
+// app.get('/user/sessions', userApi.printSessions);
+// app.get('/group/sessions', groupApi.printSessions);
+
 // User API
-app.post('/user/login', userLogin);
-app.post('/user/signup', userSignUp);
-// '/user/:id/exists'
-app.get('/user/exists/:userId', userExists);
+app.post('/user/login', userApi.login);
+app.post('/user/signup', userApi.signUp);
+app.get('/user/:userId', userApi.getUser);
+app.get('/user/:userId/exists', userApi.idExists);
+app.get('/user/:userId/groups', userApi.getGroups);
 
 // Group API
 
-// '/messages/:group'
-app.get('/messages', getMessages);
-
-// Functions for routes
-
-function getMessages(req, res) {
-  Message.find({group: req.query.group}, function(err, result) {
-    if (err) {
-      throw err;
-      return false;
-    }
-
-    res.header("Access-Control-Allow-Origin", "*");
-    res.json(result);
-  });
-});
-
-function userExists(req, res) {
-  User.count({userId: req.params.userId}, function(err, result) {
-    if (err) {
-      throw err;
-      return false;
-    }
-    var userIdExists = (result != 0);
-
-    res.header("Access-Control-Allow-Origin", "*");
-    res.json({userIdExists: userIdExists});
-  });
-});
-
-
-function userLogin(req, res) {
-  logger('Login request by user: ' + req.body.userId);
-  // If session exists, simply send it back
-  var sessionCard = sessions.getByUserId(req.body.userId);
-
-  if (sessionCard !== undefined) {
-    res.status(200).json({authCard: sessionCard});
-    return;
-  }
-
-  // Get from database
-  User.findOne({
-    userId: req.body.userId,
-    passwordHash: req.body.password
-  }, function(err, result) {
-
-    if (result !== null) {
-      sessionCard = sessions.createSession(req.body.userId);
-      res.status(200).json({authCard: sessionCard});
-    } else {
-      res.status(400).end();
-    }
-
-  });
-};
-
-function userSignUp(req, res) {
-  logger('Signup request.');
-
-  res.header("Access-Control-Allow-Origin", "*");
-  if (req.body.userId != null && req.body.userId != ''
-      &&　req.body.password != null && req.body.password != '') {
-
-    User.count({userId: req.body.userId}, function(err, result) {
-      if (err) {
-        throw err;
-        return false;
-      }
-      // If UserId doesn't exists
-      if (result === 0) {
-        var newUser = new User({
-          userId: req.body.userId,
-          passwordHash: req.body.password
-        });
-        newUser.save();
-
-        // creating a session with userId
-        var sessionCard = sessions.createSession(req.query.userId);
-        res.status(200).json({authCard: sessionCard});
-      } else {
-        res.status(400).end();
-      };
-    });
-  } else {
-    res.status(400).end();
-  }
-};
-
-// app.get('/user/auth', function(req, res) {
-//   var sessionData = {
-//     sessionId: basicAuth(req).name,
-//     securityToken: basicAuth(req).pass
-//   }
-//   var userId = sessions.pullData(sessionData, 'user');
-//   var group = sessions.pullData(sessionData, 'group');
-//   res.json({
-//     user: userId,
-//     group : group
-//   });
-// })
+app.get('/messages/:group', groupApi.getMessages);
+app.put('/messages/:group', groupApi.newMessage);
+app.put('/group', groupApi.createGroup);
 
 const server = app.listen('3001');
 const io = socketio(server);

@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const userSchema = new Schema({
-  userId: {type: String, required: true, unique: true},
+  _id: String, // {type: String, required: true, unique: true},
   passwordHash: String,
   groups: [{type: ObjectId, ref: 'Group'}]
 });

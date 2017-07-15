@@ -1,8 +1,9 @@
 
-//  Dependencies
+// Dependencies
+const logger    = require('./logger');
 
-const logger = require('./logger');
-const Message = require('./schemas/message')
+// Procedures
+const groupProc = require('./procedures/group');
 
 module.exports = exports = SocketStart;
 
@@ -11,23 +12,22 @@ function SocketStart(io) {
   io.sockets.on('connection', onConnect)
 
   function onConnect(socket) {
-    logger('Connected: ' + socket.id);
-    socket.on('disconnect', onDisconnect)
-    socket.on('msgSent', onMsgSent)
-    socket.on('joinGroup', joinGroup)
+    logger('Socket connected: ' + socket.id);
+    socket.on('disconnect', onDisconnect);
+    socket.on('msgSent', onMsgSent);
+    socket.on('joinGroup', onJoinGroup);
   }
 
   function onDisconnect() {
-    logger('Disconnected: ' + this.id);
+    logger('Socket disconnected: ' + this.id);
   }
 
   function onMsgSent(data) {
-    var message = new Message(data);
-    message.save();
+    groupProc.newMessage(data);
     this.broadcast.to(data.group).emit('newMsg', data);
   }
 
-  function joinGroup(data) {
+  function onJoinGroup(data) {
     this.join(data);
     logger(this.id + ' joined group ' + data);
   }

@@ -10,7 +10,7 @@ function randomId() {
 
 function Sessions() {
   this.sessions = [];
-  this.sessionExpiresIn = 20 * 6000; // 20 minutes
+  this.sessionExpiresIn = 20 * 60000; // 20 minutes
 }
 
 function Session(newSession) {
@@ -52,7 +52,7 @@ Sessions.prototype.createSession =　function(userId) {
   })
 
   this.sessions.push(session);
-  logger('Session created: ' + sessionId);
+  logger('Session created for ' + userId + ': ' + sessionId);
 
   // Invalidate session when expired
   function invalidateSession() {
@@ -74,92 +74,99 @@ Sessions.prototype.createSession =　function(userId) {
 };
 
 Sessions.prototype.getByUserId = function(userId) {
-  var sessionCard;
-  this.sessions.forEach(session => {
+  for (var session of this.sessions) {
     if (session.userId === userId){
-      sessionCard = session.getSessionCard();
-      // some kind of break
+      session.updateTime = new Date();
+      return session.getSessionCard();
     };
-  });
-  return sessionCard;
+  }
+  return false;
 }
 
-Sessions.prototype.isExists = function(sessionData) {
-  var isExists = false;
-  this.sessions.forEach(session => {
+Sessions.prototype.getUserId =　function(sessionData) {
+  for(var session of this.sessions){
     if (session.sessionId === sessionData.sessionId
       && session.securityToken === sessionData.securityToken)
       {
-        isExists = true;
+        session.updateTime = new Date();
+        return session.userId;
       }
-  })
-  return isExists
+  }
+  return false;
+}
+
+Sessions.prototype.isExists = function(sessionData) {
+  for (var session of this.sessions) {
+    if (session.sessionId === sessionData.sessionId
+      && session.securityToken === sessionData.securityToken)
+      {
+        session.updateTime = new Date();
+        return true;;
+      }
+  }
+  return false;
 }
 
 /**
 /*  Set data to session (returns true on success)
 **/
 Sessions.prototype.pushData = function(sessionData, data) {
-  var success = false;
-  this.sessions.forEach(session => {
+  for (var session of this.sessions) {
     if (session.sessionId === sessionData.sessionId
       && session.securityToken === sessionData.securityToken)
       {
         session.storage[data.key] = data.data;
-        success = true;
         session.updateTime = new Date();
+        return true;
       }
-  })
-  return success;
+  }
+  return false;
 }
 
 /**
 /* Get data from session
 */
 Sessions.prototype.pullData = function(sessionData, key) {
-  var result;
-  this.sessions.forEach(session => {
+  for (session of this.sessions) {
     if (session.sessionId === sessionData.sessionId
       && session.securityToken === sessionData.securityToken)
       {
-        result = session.storage[key];
         session.updateTime = new Date();
+        return session.storage[key];
       }
-  })
-  return result;
+  }
+  return false;
 }
 
 /**
 /*  Delete data from session
 **/
 Sessions.prototype.dropData = function(sessionData, key) {
-  var success = false;
-  this.sessions.forEach(session => {
+  for (var session of this.sessions) {
     if (session.sessionId === sessionData.sessionId
       && session.securityToken === sessionData.securityToken)
       {
         delete session.storage[key];
-        success = true;
         session.updateTime = new Date();
+        return true;
       }
-  })
-  return success;
+  }
+  return false;
 }
 
 /**
 /*  Invalidate session (returns true on success)
 **/
 Sessions.prototype.destroy = function(data) {
-  var success = false;
-  this.sessions.forEach(session => {
+  for (var session of this.sessions) {
     if (session.sessionId === data.sessionId
       && session.securityToken === data.securityToken)
       {
         this.sessions.splice(this.sessions.indexOf(session), 1);
-        success = true;
+        return true;
       }
-  })
-  return success;
+  }
+  return false;
 }
 
-module.exports = exports = Sessions;
+module.exports = exports = new Sessions();
