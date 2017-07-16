@@ -3,9 +3,8 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const userSchema = new Schema({
-  _id: String, // {type: String, required: true, unique: true},
-  passwordHash: String,
-  groups: [{type: ObjectId, ref: 'Group'}]
+  _id: String,
+  passwordHash: String
 });
 
 const User = mongoose.model('user', userSchema);

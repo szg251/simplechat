@@ -1,4 +1,4 @@
-const logger =　require('./logger');
+const logger = require('./logger');
 
 /**
 /*  Generate a random id
@@ -13,34 +13,42 @@ function Sessions() {
   this.sessionExpiresIn = 20 * 60000; // 20 minutes
 }
 
-function Session(newSession) {
+function Session(newSession, sessionExpiresIn) {
   this.sessionId = newSession.sessionId;
   this.securityToken = newSession.securityToken;
   this.createTime = new Date();
-  this.updateTime = new Date();
+  this.expireTime = new Date(sessionExpiresIn +　Date.now());
   this.userId = newSession.userId;
   this.storage = {};
 
-  this.getSessionCard = function() {
+  this.getSessionCard = function () {
     return {
       sessionId: this.sessionId,
-      securityToken: this.securityToken
+      securityToken: this.securityToken,
+      createTime: this.createTime,
+      expireTime: this.expireTime
     }
+  }
+
+  this.refreshExpireTime = function() {
+    this.expireTime = new Date(sessionExpiresIn +　Date.now());
   }
 }
 
 /**
 /*  Create a new session (returns sessionObject )
 **/
-Sessions.prototype.createSession =　function(userId) {
+Sessions.prototype.createSession = function (userId) {
   // Generate unique ID
   var sessionId = 1;
   var idExists;
   do {
     sessionId = randomId();
-    sessionExists = false;
+    idExists = false;
     this.sessions.forEach(session => {
-      if (session.sessionId === sessionId) sessionExists = true;
+      if (session.sessionId === sessionId) {
+        idExists = true;
+      }
     });
   } while (idExists);
 
@@ -48,8 +56,8 @@ Sessions.prototype.createSession =　function(userId) {
   var session = new Session({
     sessionId: sessionId,
     securityToken: randomId(),
-    userId: userId,
-  })
+    userId: userId
+  }, this.sessionExpiresIn);
 
   this.sessions.push(session);
   logger('Session created for ' + userId + ': ' + sessionId);
@@ -57,7 +65,7 @@ Sessions.prototype.createSession =　function(userId) {
   // Invalidate session when expired
   function invalidateSession() {
     // Computing the remaining time before expiry
-    var updateTimeDiff = (session.updateTime.getTime() + this.sessionExpiresIn) - (new Date().getTime());
+    var updateTimeDiff = session.expireTime.getTime() - new Date().getTime();
 
     // If no time remains, invalidate, else put on waiting list
     if (updateTimeDiff < 0) {
@@ -73,36 +81,34 @@ Sessions.prototype.createSession =　function(userId) {
   return session.getSessionCard();
 };
 
-Sessions.prototype.getByUserId = function(userId) {
+Sessions.prototype.getByUserId = function (userId) {
   for (var session of this.sessions) {
-    if (session.userId === userId){
-      session.updateTime = new Date();
+    if (session.userId === userId) {
+      session.refreshExpireTime();
       return session.getSessionCard();
     };
   }
-  return false;
+  return;
 }
 
-Sessions.prototype.getUserId =　function(sessionData) {
-  for(var session of this.sessions){
-    if (session.sessionId === sessionData.sessionId
-      && session.securityToken === sessionData.securityToken)
-      {
-        session.updateTime = new Date();
-        return session.userId;
-      }
-  }
-  return false;
-}
-
-Sessions.prototype.isExists = function(sessionData) {
+Sessions.prototype.getUserId = function (sessionData) {
   for (var session of this.sessions) {
     if (session.sessionId === sessionData.sessionId
-      && session.securityToken === sessionData.securityToken)
-      {
-        session.updateTime = new Date();
-        return true;;
-      }
+      && session.securityToken === sessionData.securityToken) {
+      session.refreshExpireTime();
+      return session.userId;
+    }
+  }
+  return null;
+}
+
+Sessions.prototype.exists = function (sessionData) {
+  for (var session of this.sessions) {
+    if (session.sessionId === sessionData.sessionId
+      && session.securityToken === sessionData.securityToken) {
+      session.refreshExpireTime();
+      return true;;
+    }
   }
   return false;
 }
@@ -110,15 +116,14 @@ Sessions.prototype.isExists = function(sessionData) {
 /**
 /*  Set data to session (returns true on success)
 **/
-Sessions.prototype.pushData = function(sessionData, data) {
+Sessions.prototype.pushData = function (sessionData, data) {
   for (var session of this.sessions) {
     if (session.sessionId === sessionData.sessionId
-      && session.securityToken === sessionData.securityToken)
-      {
-        session.storage[data.key] = data.data;
-        session.updateTime = new Date();
-        return true;
-      }
+      && session.securityToken === sessionData.securityToken) {
+      session.storage[data.key] = data.data;
+      session.refreshExpireTime();
+      return true;
+    }
   }
   return false;
 }
@@ -126,14 +131,13 @@ Sessions.prototype.pushData = function(sessionData, data) {
 /**
 /* Get data from session
 */
-Sessions.prototype.pullData = function(sessionData, key) {
+Sessions.prototype.pullData = function (sessionData, key) {
   for (session of this.sessions) {
     if (session.sessionId === sessionData.sessionId
-      && session.securityToken === sessionData.securityToken)
-      {
-        session.updateTime = new Date();
-        return session.storage[key];
-      }
+      && session.securityToken === sessionData.securityToken) {
+      session.refreshExpireTime();
+      return session.storage[key];
+    }
   }
   return false;
 }
@@ -141,15 +145,14 @@ Sessions.prototype.pullData = function(sessionData, key) {
 /**
 /*  Delete data from session
 **/
-Sessions.prototype.dropData = function(sessionData, key) {
+Sessions.prototype.dropData = function (sessionData, key) {
   for (var session of this.sessions) {
     if (session.sessionId === sessionData.sessionId
-      && session.securityToken === sessionData.securityToken)
-      {
-        delete session.storage[key];
-        session.updateTime = new Date();
-        return true;
-      }
+      && session.securityToken === sessionData.securityToken) {
+      delete session.storage[key];
+      session.refreshExpireTime();
+      return true;
+    }
   }
   return false;
 }
@@ -157,14 +160,13 @@ Sessions.prototype.dropData = function(sessionData, key) {
 /**
 /*  Invalidate session (returns true on success)
 **/
-Sessions.prototype.destroy = function(data) {
+Sessions.prototype.destroy = function (data) {
   for (var session of this.sessions) {
     if (session.sessionId === data.sessionId
-      && session.securityToken === data.securityToken)
-      {
-        this.sessions.splice(this.sessions.indexOf(session), 1);
-        return true;
-      }
+      && session.securityToken === data.securityToken) {
+      this.sessions.splice(this.sessions.indexOf(session), 1);
+      return true;
+    }
   }
   return false;
 }

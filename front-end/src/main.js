@@ -6,13 +6,15 @@ import App from './App'
 import Chat from './components/Chat'
 import SignUp from './components/user/SignUp'
 import Login from './components/user/Login'
+import MainPage from './components/MainPage'
 
 Vue.config.productionTip = false
 
 Vue.use(VueRouter)
 
 const routes = [
-  {path: '/', component: Chat},
+  {path: '/', component: MainPage},
+  {path: '/chat', component: Chat},
   {path: '/signup', component: SignUp},
   {path: '/login', component: Login}
 ]

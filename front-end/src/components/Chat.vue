@@ -2,8 +2,7 @@
   <div class="hello">
     <transition name="slide">
       <div v-if="isChatVisible" class="col-xs-5 col-sm-4 col-md-3 chat-panel">
-        <input type="text" v-model="currentUser">
-        <input type="text" v-model="currentGroup">
+        <h2>{{currentUser}}</h2>
 
         <div v-for="message in messages">
           <small>{{message.user}} - {{message.time}}</small>
@@ -32,30 +31,44 @@
 </template>
 
 <script>
-var axios = require('axios')
-var io = require('socket.io-client')
-var routes = require('../../config/routes')
-var socket = io.connect(routes.socketRoute)
+
+var axios   = require('axios')
+var io      = require('socket.io-client')
+var routes  = require('../../config/routes')
+var socket;
+axios.defaults.withCredentials = true;
 
 export default {
   name: 'chat',
   data () {
     return {
       newMsg: '',
-      currentUser: 'Gergo',
-      currentGroup: 'NG',
+      currentUser: '',
+      currentGroup: '5969d2277fd4d37fd60c00ba',
       messages: [],
-      isChatVisible: false
+      isChatVisible: true,
+        "sessionId": "1gip.k6d9d",
+        "securityToken": "s9p.5pihw5"
     }
   },
   created: function() {
-    socket.emit('joinGroup', this.currentGroup);
+
+    socket  = io.connect(routes.socketRoute, {query:
+          {sessionId: this.sessionId, securityToken: this.securityToken}})
+
+    socket.emit('join group', this.currentGroup);
 
     socket.on('newMsg', (data) => {
       this.messages.push(data);
     })
 
-    axios.get(routes.apiRoute + '/messages', {params: {group: this.currentGroup}})
+    axios.get(routes.apiRoutes.getUser)
+      .then(response => {
+        this.currentUser = response.data.userInfo.userId;
+      })
+
+    axios.get(routes.apiRoutes.getMessages(this.currentGroup),
+      {withCredentials: true})
       .then(response => {
         this.messages = response.data;
       })
@@ -71,7 +84,7 @@ export default {
       }
 
       this.messages.push(newMsg);
-      socket.emit('msgSent', newMsg);
+      socket.emit('message from client', newMsg);
       this.newMsg = '';
     },
     toggleChat: function() {

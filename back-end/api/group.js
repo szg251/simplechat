@@ -10,23 +10,37 @@ const groupProc   = require('../procedures/group');
 const Group       = require('../schemas/group');
 const Message     = require('../schemas/message');
 
-// exports.printSessions = function(req, res) {
-//   res.json(sessions);
-// }
-
 exports.newMessage = function(req, res) {
   groupProc.newMessage(req.body.message);
 }
 
 exports.getMessages = function(req, res) {
-  Message.find({group: req.params.group}, function(err, result) {
-    if (err) {
-      throw err;
-    }
+  // var sessionCard = {
+  //   sessionId: req.cookies.sessionId,
+  //   securityToken: req.cookies.securityToken
+  // }
+  Group.count({_id: req.params.group, members: sessions.getUserId(req.cookies)}, function(err, result){
+    try {
+      if (err) {
+        throw err;
+      }
 
-    res.header("Access-Control-Allow-Origin", "*");
-    res.json(result);
-  });
+      if (result === 0) {
+        throw 'unauthorized, or invalid group id';
+      }
+
+      Message.find({group: req.params.group}, function(err, result) {
+        if (err) {
+          throw err;
+        }
+        res.json(result);
+      });
+
+    } catch(err) {
+      logger('Error: ' + err);
+      res.status(400).send(err);
+    }
+  })
 };
 
 exports.createGroup = function(req, res) {
@@ -35,7 +49,7 @@ exports.createGroup = function(req, res) {
     sessionId: basicAuth(req).name,
     securityToken: basicAuth(req).pass
   }
-  if (sessions.isExists(sessionCard)) {
+  if (sessions.exists(sessionCard)) {
 
     var owner     = sessions.getUserId(sessionCard);
     var members   = [owner].concat(req.body.members);

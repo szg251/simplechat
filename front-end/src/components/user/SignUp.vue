@@ -1,6 +1,7 @@
 <template>
-  <div class="container">
-    <form class="form-horizontal">
+  <div class="col-md-4 col-md-offset-4">
+    <form>
+      <h1>Sign up</h1>
 
       <div class="form-group">
         <div v-if="inputError.user" class="alert alert-danger">User ID invalid</div>
@@ -20,7 +21,7 @@
 
       <div class="form-group">
         <input class="form-control" type="password"
-              name="password2" placeholder="Password ()"
+              name="password2" placeholder="Confirm password"
               v-model="password2"
               v-on:change="checkPassword2">
       </div>
@@ -61,7 +62,7 @@ export default {
     checkUserId: function() {
       this.isEntered.user =　true;
       if (this.userId !== '') {
-        axios.get(routes.apiRoute + '/user/exists/' + this.userId)
+        axios.get(routes.apiRoutes.userExists(this.userId))
             .then(res => {
               this.idExists = res.data.userIdExists;
               this.inputError.user = (this.userId === '') || this.idExists;
@@ -84,11 +85,9 @@ export default {
       if (!this.inputError.user && !this.inputError.password
         && this.isEntered.user && this.isEntered.pass1 && this.isEntered.pass2) {
 
-        axios.get(routes.apiRoute + '/user/signup', {
-          params: {
-            userId: this.userId,
-            password: this.password1
-          }
+        axios.post(routes.apiRoutes.signup, {
+          userId: this.userId,
+          password: this.password1
         })
        }
     }

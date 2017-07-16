@@ -7,10 +7,6 @@ const sessions    = require('../session');
 const User        = require('../schemas/user');
 const Group        = require('../schemas/group');
 
-// exports.printSessions = function(req, res) {
-//   res.json(sessions);
-// }
-
 /**
   * Checking if userId already exists (mostly before signup)
   */
@@ -23,28 +19,34 @@ exports.idExists = function(req, res) {
     }
     var userIdExists = (result != 0);
 
-    res.header("Access-Control-Allow-Origin", "*");
     res.json({userIdExists: userIdExists});
   })
 }
 
 exports.getUser =　function(req, res) {
-  var sessionCard = {
-    sessionId: basicAuth(req).name,
-    securityToken: basicAuth(req).pass
+  logger('User information request.');
+  if (req.cookies.sessionId == null ||　sessions.getUserId(req.cookies) ==　null) {
+    res.json({success: false});
+    logger('User information request failed.');
+    return;
   }
 
-  if (sessions.getUserId(sessionCard) === req.params.userId) {
-    User.findOne({_id: req.params.userId}, function(err, user) {
-      var userInfo =　{
-        userId: _id,
-        // ...
+  User.findOne({_id: sessions.getUserId(req.cookies)}, function(err, user) {
+    try {
+      if (err) {
+        throw err;
       }
-      res.json(userInfo);
-    })
-  } else {
-    res.status(400).end();
-  }
+
+      var userInfo =　{
+        userId: user._id
+      }
+      res.json({success: true, userInfo: userInfo});
+
+    } catch(err) {
+      logger('Database error: ' + err);
+      res.status(400).json({success: false});
+    }
+  })
 }
 
 /**
@@ -58,8 +60,12 @@ exports.login = function(req, res) {
   // If session exists, simply send it back
   var sessionCard = sessions.getByUserId(req.body.userId);
 
-  if (sessionCard !== false) {
-    res.status(200).json({authCard: sessionCard});
+  if (sessionCard !== undefined) {
+    res
+      .cookie('sessionId', sessionCard.sessionId, {expire: sessionCard.expireTime.getTime()})
+      .cookie('securityToken', sessionCard.securityToken, {expire: sessionCard.expireTime.getTime()})
+      .status(200)
+      .json({authCard: sessionCard});
     logger('Login successful.');
     return;
   }
@@ -72,7 +78,11 @@ exports.login = function(req, res) {
 
     if (result !== null) {
       sessionCard = sessions.createSession(req.body.userId);
-      res.status(200).json({authCard: sessionCard});
+      res
+        .cookie('sessionId', sessionCard.sessionId, {expire: sessionCard.expireTime.getTime()})
+        .cookie('securityToken', sessionCard.securityToken, {expire: sessionCard.expireTime.getTime()})
+        .status(200)
+        .json({authCard: sessionCard});
       logger('Login successful.');
     } else {
       res.status(400).end();
@@ -82,20 +92,35 @@ exports.login = function(req, res) {
   });
 };
 
+exports.logout = function(req, res) {
+  logger('Logout request by ' +　req.params.userId);
+  if (sessions.getUserId(req.cookies) != null
+    && req.params.userId === sessions.getUserId(req.cookies)) {
+    sessions.destroy(req.cookies);
+    res
+      .status(200)
+      .clearCookie('sessionId')
+      .clearCookie('securityToken')
+      .json({userLogout: true});
+      logger('Logged out');
+  } else {
+    res.status(400).json({userLogout: false});
+    logger('Logout failed.');
+  }
+}
+
 /**
  *  Sign up procedure
  */
 exports.signUp = function(req, res) {
   logger('Signup request by ' + req.body.userId);
 
-  res.header("Access-Control-Allow-Origin", "*");
   if (req.body.userId != null && req.body.userId != ''
       &&　req.body.password != null && req.body.password != '') {
 
     User.count({userId: req.body.userId}, function(err, result) {
       if (err) {
         throw err;
-        return false;
       }
       // checking if userId exists
       if (result === 0) {
@@ -107,15 +132,19 @@ exports.signUp = function(req, res) {
 
         // creating a session with userId
         var sessionCard = sessions.createSession(req.body.userId);
-        res.status(200).json({authCard: sessionCard});
+        res
+          .cookie('sessionId', sessionCard.sessionId, {expire: sessionCard.expireTime})
+          .cookie('securityToken', sessionCard.securityToken, {expire: sessionCard.expireTime})
+          .status(200)
+          .json({authCard: sessionCard});
         logger('Sign up successful.');
       } else {
-        res.status(400).end();
+      res.status(400).json({signUpCompleted: false});
         logger('Sign up failed.');
       }
     })
   } else {
-    res.status(400).end();
+    res.status(400).json({signUpCompleted: false});
     logger('Sign up failed.');
   }
 }
