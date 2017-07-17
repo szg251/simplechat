@@ -34,38 +34,25 @@ db.on('error', function(err) {
 
 /**
  *  Routing
-**/
+ **/
 
-// app.get('/user/sessions', userApi.printSessions);
-// app.get('/group/sessions', groupApi.printSessions);
+//Filters
+app.all('/user*', userApi.userFilter);
+app.all('/messages/:group*', groupApi.groupFilter);
 
 // User API
-app.post('/user/login', userApi.login);
-app.post('/user/signup', userApi.signUp);
-app.get('/user/:userId/logout', userApi.logout);
+app.post('/login', userApi.login);
+app.post('/signup', userApi.signUp);
 app.get('/user', userApi.getUser);
-app.get('/user/:userId/exists', userApi.idExists);
+app.get('/user/:userId/logout', userApi.logout);
 app.get('/user/:userId/groups', userApi.getGroups);
+app.get('/signup/:userId', userApi.idExists); // not filtered
 
 // Group API
-
-app.get('/messages/:group', groupApi.getMessages);
-app.put('/messages/:group', groupApi.newMessage);
+app.get('/group/:group/messages', groupApi.getMessages);
+app.put('/group/:group/messages', groupApi.newMessage);
 app.put('/group', groupApi.createGroup);
 
 const server = app.listen('3001');
 const io = socketio(server);
 require('./socket-start')(io)
-
-// var sessionCard = sessions.createSession();
-// sessions.pushData(sessionCard, {key: 'user', data: 'Gergo'});
-// sessions.pushData(sessionCard, {key: 'group', data: 'NG'});
-
-// var sessionCard = sessions.createSession();
-// setTimeout(function() {sessions.pushData(sessionCard, {key: 'key', data: 'data'})}, 4000);
-// getData();
-// setTimeout(getData, 7000)
-//
-// function getData() {
-//   console.log(sessions.pullData(sessionCard, 'key'));
-// }

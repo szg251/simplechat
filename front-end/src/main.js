@@ -4,6 +4,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import App from './App'
 import Chat from './components/Chat'
+import Groups from './components/Groups'
 import SignUp from './components/user/SignUp'
 import Login from './components/user/Login'
 import MainPage from './components/MainPage'
@@ -14,7 +15,7 @@ Vue.use(VueRouter)
 
 const routes = [
   {path: '/', component: MainPage},
-  {path: '/chat', component: Chat},
+  {path: '/chat', component: Groups},
   {path: '/signup', component: SignUp},
   {path: '/login', component: Login}
 ]

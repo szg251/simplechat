@@ -10,6 +10,11 @@ const groupProc   = require('../procedures/group');
 const Group       = require('../schemas/group');
 const Message     = require('../schemas/message');
 
+exports.groupFilter =　function(req, res) {
+  logger('Group authentication filter for: ' +　req.originalUrl);
+  req.next();
+}
+
 exports.newMessage = function(req, res) {
   groupProc.newMessage(req.body.message);
 }
@@ -33,12 +38,12 @@ exports.getMessages = function(req, res) {
         if (err) {
           throw err;
         }
-        res.json(result);
+        res.json({success: true, messages: result});
       });
 
     } catch(err) {
       logger('Error: ' + err);
-      res.status(400).send(err);
+      res.status(400).json({success: false});
     }
   })
 };
@@ -61,10 +66,10 @@ exports.createGroup = function(req, res) {
     newGroup.save(function(err) {
       logger(err);
     });
-    res.json(newGroup);
+    res.json({success: true, newGroup: newGroup});
     logger('Group successfully created.');
   } else {
-      res.status(400).end();
+      res.status(400).json({success: false});
       logger('Group creation failed.');
   }
 }

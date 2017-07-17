@@ -1,6 +1,6 @@
 <template>
-  <div class="hello">
-    <transition name="slide">
+  <!-- <div>
+    <transition name="slide"> -->
       <div v-if="isChatVisible" class="col-xs-5 col-sm-4 col-md-3 chat-panel">
         <h2>{{currentUser}}</h2>
 
@@ -24,17 +24,18 @@
 
       </div>
     </transition>
-    <transition>
+    <!-- <transition>
       <button class="chat-btn btn" v-on:click="toggleChat">{{isChatVisible ? '<' : '>'}}</button>
-    </transition>
+    </transition> -->
   </div>
 </template>
 
 <script>
 
-var axios   = require('axios')
-var io      = require('socket.io-client')
-var routes  = require('../../config/routes')
+import axios from 'axios'
+import routes from '../../config/routes'
+import io from 'socket.io-client'
+
 var socket;
 axios.defaults.withCredentials = true;
 
@@ -43,18 +44,22 @@ export default {
   data () {
     return {
       newMsg: '',
-      currentUser: '',
-      currentGroup: '5969d2277fd4d37fd60c00ba',
       messages: [],
       isChatVisible: true,
-        "sessionId": "1gip.k6d9d",
-        "securityToken": "s9p.5pihw5"
+      sessionId: '',
+      securityToken: ''
     }
   },
+  props: ['currentGroup', 'currentUser'],
   created: function() {
 
-    socket  = io.connect(routes.socketRoute, {query:
-          {sessionId: this.sessionId, securityToken: this.securityToken}})
+    socket = io.connect(routes.socketRoute, {
+      // TODO socket authentication
+      query: {
+            sessionId: this.sessionId,
+            securityToken: this.securityToken
+          }
+    })
 
     socket.emit('join group', this.currentGroup);
 
@@ -62,15 +67,10 @@ export default {
       this.messages.push(data);
     })
 
-    axios.get(routes.apiRoutes.getUser)
-      .then(response => {
-        this.currentUser = response.data.userInfo.userId;
-      })
-
     axios.get(routes.apiRoutes.getMessages(this.currentGroup),
       {withCredentials: true})
       .then(response => {
-        this.messages = response.data;
+        this.messages = response.data.messages;
       })
   },
   methods: {

@@ -7,6 +7,18 @@ const sessions    = require('../session');
 const User        = require('../schemas/user');
 const Group        = require('../schemas/group');
 
+exports.userFilter =　function(req, res) {
+  logger('User authentication filter for: ' + req.originalUrl);
+  if (req.cookies.sessionId == null || req.cookies.securityToken == null
+      || sessions.getUserId(req.cookies) ==　null) {
+        res.status(401).json({success: false});
+        logger('Unauthorized');
+        return;
+  } else {
+      req.next();
+  }
+}
+
 /**
   * Checking if userId already exists (mostly before signup)
   */
@@ -25,11 +37,6 @@ exports.idExists = function(req, res) {
 
 exports.getUser =　function(req, res) {
   logger('User information request.');
-  if (req.cookies.sessionId == null ||　sessions.getUserId(req.cookies) ==　null) {
-    res.json({success: false});
-    logger('User information request failed.');
-    return;
-  }
 
   User.findOne({_id: sessions.getUserId(req.cookies)}, function(err, user) {
     try {
@@ -62,30 +69,30 @@ exports.login = function(req, res) {
 
   if (sessionCard !== undefined) {
     res
-      .cookie('sessionId', sessionCard.sessionId, {expire: sessionCard.expireTime.getTime()})
-      .cookie('securityToken', sessionCard.securityToken, {expire: sessionCard.expireTime.getTime()})
+      .cookie('sessionId', sessionCard.sessionId, {expire: sessionCard.expireTime})
+      .cookie('securityToken', sessionCard.securityToken, {expire: sessionCard.expireTime})
       .status(200)
-      .json({authCard: sessionCard});
+      .json({success: true, authCard: sessionCard});
     logger('Login successful.');
     return;
   }
 
-  // Get from database
+  // Otherwise, get from database
   User.findOne({
     _id: req.body.userId,
     passwordHash: req.body.password
   }, function(err, result) {
 
-    if (result !== null) {
+    if (err == null && result !== null) {
       sessionCard = sessions.createSession(req.body.userId);
       res
-        .cookie('sessionId', sessionCard.sessionId, {expire: sessionCard.expireTime.getTime()})
-        .cookie('securityToken', sessionCard.securityToken, {expire: sessionCard.expireTime.getTime()})
+        .cookie('sessionId', sessionCard.sessionId, {expire: sessionCard.expireTime})
+        .cookie('securityToken', sessionCard.securityToken, {expire: sessionCard.expireTime})
         .status(200)
-        .json({authCard: sessionCard});
+        .json({success: true, authCard: sessionCard});
       logger('Login successful.');
     } else {
-      res.status(400).end();
+      res.status(400).json({success: false});
       logger('Login failed.');
     }
 
@@ -115,57 +122,55 @@ exports.logout = function(req, res) {
 exports.signUp = function(req, res) {
   logger('Signup request by ' + req.body.userId);
 
-  if (req.body.userId != null && req.body.userId != ''
-      &&　req.body.password != null && req.body.password != '') {
+  if (req.body.userId != null || req.body.userId != ''
+      ||　req.body.password != null || req.body.password != '') {
 
-    User.count({userId: req.body.userId}, function(err, result) {
-      if (err) {
-        throw err;
-      }
-      // checking if userId exists
-      if (result === 0) {
-        var newUser = new User({
-          _id: req.body.userId,
-          passwordHash: req.body.password
-        });
-        newUser.save();
-
-        // creating a session with userId
-        var sessionCard = sessions.createSession(req.body.userId);
-        res
-          .cookie('sessionId', sessionCard.sessionId, {expire: sessionCard.expireTime})
-          .cookie('securityToken', sessionCard.securityToken, {expire: sessionCard.expireTime})
-          .status(200)
-          .json({authCard: sessionCard});
-        logger('Sign up successful.');
-      } else {
-      res.status(400).json({signUpCompleted: false});
-        logger('Sign up failed.');
-      }
-    })
-  } else {
     res.status(400).json({signUpCompleted: false});
     logger('Sign up failed.');
+    return;
   }
+
+  User.count({userId: req.body.userId}, function(err, result) {
+    if (err) {
+      logger('Database error: ' +　err)
+      res.status(500).json({success: false});
+      return;
+    }
+    // checking if userId exists
+    if (result === 0) {
+      var newUser = new User({
+        _id: req.body.userId,
+        passwordHash: req.body.password
+      });
+      newUser.save();
+
+      // creating a session with userId
+      var sessionCard = sessions.createSession(req.body.userId);
+      res
+        .cookie('sessionId', sessionCard.sessionId, {expire: sessionCard.expireTime})
+        .cookie('securityToken', sessionCard.securityToken, {expire: sessionCard.expireTime})
+        .status(200)
+        .json({success: true, authCard: sessionCard});
+      logger('Sign up successful.');
+    } else {
+    res.status(400).json({success: false});
+      logger('Sign up failed.');
+    }
+  })
 }
 
 /**
  *  Get groups of a user
  */
 exports.getGroups =　function(req, res) {
-  logger('Get groups request by ' + basicAuth(req).name);
-  var sessionCard = {
-    sessionId: basicAuth(req).name,
-    securityToken: basicAuth(req).pass
-  }
+  logger('Get groups request by ' + sessions.getUserId(req.cookies));
 
-  if (sessions.getUserId(sessionCard) === req.params.userId) {
-    Group.find({members: req.params.userId}, function(err, groups) {
-      res.json(groups);
-      logger('Get groups request successful.');
-    })
-  } else {
-    res.status(400).end();
-    logger('Get groups request failed.');
-  }
+  Group.find({members: req.params.userId}, function(err, groups) {
+    if (err) {
+      logger('Database error: ' + err);
+      res.status(500).json({success: false});
+    }
+    res.json({success: true, groups: groups});
+    logger('Get groups request successful.');
+  })
 }

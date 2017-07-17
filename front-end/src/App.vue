@@ -11,7 +11,7 @@
         </ul>
       </div>
     </div>
-    <router-view></router-view>
+    <router-view :currentUser="currentUser"></router-view>
   </div>
 </template>
 
