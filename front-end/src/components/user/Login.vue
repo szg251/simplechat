@@ -36,9 +36,10 @@ export default {
       axios.post(routes.apiRoutes.login, {
           userId: this.userId,
           password: this.password
-      }).then(function() {
-        this.$router.push('/chat');
-      } .bind(this));
+      }).then(result => {
+        if (result.data.success)
+          this.$router.push('/chat');
+      });
     }
   }
 }

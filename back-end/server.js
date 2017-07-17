@@ -9,6 +9,7 @@ const cors          = require('cors');
 const cookieParser  = require('cookie-parser');
 
 // API functions
+const filters       = require('./api/filters');
 const userApi       = require('./api/user');
 const groupApi      = require('./api/group');
 
@@ -37,8 +38,10 @@ db.on('error', function(err) {
  **/
 
 //Filters
-app.all('/user*', userApi.userFilter);
-app.all('/messages/:group*', groupApi.groupFilter);
+app.all('/user*', filters.userFilter);
+app.all('/group*', filters.userFilter);
+app.all('/user/:userId*', filters.userParamFilter);
+app.all('/group/:group*', filters.groupFilter);
 
 // User API
 app.post('/login', userApi.login);

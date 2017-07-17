@@ -3,7 +3,9 @@
     <chat class="col-md-3" v-for="group in groups"
         :key="group"
         :currentGroup="group"
-        :currentUser="currentUser"></chat>
+        :currentUser="currentUser">
+    </chat>
+    <new-group class="col-md-3"></new-group>
   </div>
 </template>
 
@@ -12,6 +14,7 @@
 import axios from 'axios'
 import routes from '../../config/routes'
 import Chat from './Chat'
+import NewGroup from './NewGroup'
 
 axios.defaults.withCredentials = true;
 
@@ -23,7 +26,7 @@ export default {
     }
   },
   components: {
-    Chat
+    Chat, NewGroup
   },
   props: ['currentUser'],
   watch: {

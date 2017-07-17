@@ -88,6 +88,8 @@ export default {
         axios.post(routes.apiRoutes.signup, {
           userId: this.userId,
           password: this.password1
+        }).then(result => {
+          this.$router.push('/chat');
         })
        }
     }
