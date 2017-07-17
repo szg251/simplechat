@@ -167,3 +167,11 @@ exports.getGroups =　function(req, res) {
     logger('Get groups request successful.');
   })
 }
+
+exports.findUser = function(req, res) {
+  logger('Find userId request by ' + sessions.getUserId(req.cookies));
+
+  User.find({_id: req.params.userId}, function(result) {
+      res.status(200).json({success: true, userIds: result});
+    })
+}

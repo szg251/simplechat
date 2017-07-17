@@ -50,6 +50,7 @@ app.get('/user', userApi.getUser);
 app.get('/user/:userId/logout', userApi.logout);
 app.get('/user/:userId/groups', userApi.getGroups);
 app.get('/signup/:userId', userApi.idExists); // not filtered
+app.get('/finduser', userApi.findUser);
 
 // Group API
 app.get('/group/:group/messages', groupApi.getMessages);
