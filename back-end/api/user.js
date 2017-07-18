@@ -13,12 +13,12 @@ const Group        = require('../schemas/group');
 exports.idExists = function(req, res) {
   User.count({_id: req.params.userId}, function(err, result) {
     if (err) {
-      res.status(500).end();
+      res.status(500).json({success: false});
       return;
     }
     var userIdExists = (result != 0);
 
-    res.json({userIdExists: userIdExists});
+    res.status(200).json({success: true, userIdExists: userIdExists});
   })
 }
 

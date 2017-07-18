@@ -5,15 +5,18 @@
       <input type="text" class="form-control" placeholder="Group name" v-model="groupName">
     </div>
     <div class="form-group">
+      <div class="alert alert-danger" v-if="errors.noMembers">You must input at least one member</div>
+      <div class="alert alert-danger" v-if="errors.invalidMember">UserId doesn't exist</div>
       <div class="input-group" v-for="(member, i) in members">
-        <input type="text" list="userIds" class="form-control" placeholder="Member"
+        <input type="text" :id="'member' + i" list="userIds" class="form-control" placeholder="Member"
             v-model="member.user"
-            v-on:keyup="memberKeyup">
+            v-on:keyup="memberKeyup"
+            v-on:change="checkMember">
             <datalist id="userIds">
               <option v-for="userId in userIds" :value="userId"/>
             </datalist>
             <span class="input-group-btn">
-              <a class="btn btn-default" v-on:click.capture="closeMemberInput" :id="'close' + i"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+              <a class="btn btn-default" v-on:click="closeMemberInput" :id="'close' + i"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
             </span>
       </div>
     </div>
@@ -33,7 +36,12 @@ export default {
     return {
       groupName: '',
       members: [{user: ''}],
-      userIds: []
+      userIds: [],
+      errors: {
+        noMembers: false,
+        invalidMembers: [],
+        invalidMember: false
+      }
     }
   },
   methods: {
@@ -46,22 +54,74 @@ export default {
         this.members.push({user: ''})
       }
     },
-    closeMemberInput: function(e) {
-      var memberId = e.toElement.id.slice(5, e.toElement.length);
-      this.members.splice(memberId, 1);
-    },
-    submit: function() {
-      e.preventDefault();
-      var members = [];
-      for (var member of this.members){
-        if (member.user != '') {
-          members.push(member.user)
+    checkMember: function(e) {
+      if (e.target.value === '') {
+        this.errors.invalidMembers[e.target.id.slice(6, e.target.id.length)] = false;
+        for (var i = 0; i < this.errors.invalidMembers.length; i++) {
+          if (this.errors.invalidMembers[i]) {
+            this.errors.invalidMember = true;
+            return;
+          }
         }
-      }
-      axios.put(routes.apiRoutes.createGroup, {
-        name: this.groupName,
-        members: members
+        this.errors.invalidMember = false;
+        return;
+      } 
+
+      axios.get(routes.apiRoutes.userExists(e.target.value))
+        .then(results => {
+        if (!results.data.userIdExists) {
+          this.errors.invalidMembers[e.target.id.slice(6, e.target.id.length)] = true;
+        } else {
+          this.errors.invalidMembers[e.target.id.slice(6, e.target.id.length)] = false;
+        }
+        for (var i = 0; i < this.errors.invalidMembers.length; i++) {
+          if (this.errors.invalidMembers[i]) {
+            this.errors.invalidMember = true;
+            return;
+          }
+        }
+        this.errors.invalidMember = false;
       });
+
+      // console.log(this.errors)
+      
+      
+    },
+    closeMemberInput: function(e) {
+      if (this.members.length > 1) {
+        var memberId = e.toElement.id.slice(5, e.toElement.length);
+        this.members.splice(memberId, 1);
+      }
+    },
+    submit: function(e) {
+      e.preventDefault();
+      if (this.errors.invalidMember || this.errors.noMembers) {
+        return;
+      }
+      var members = [];
+      for (var i = 0; i < this.members.length; i++){
+        var isDuplicate = false;
+        for (var j = 0; j < i; j++) {
+          if (this.members[i].user === this.members[j].user) {
+            isDuplicate = true;
+            break;
+          }
+        }
+
+        if (!isDuplicate && this.members[i].user != '') {
+          members.push(this.members[i].user)
+        }
+
+      }
+      console.log('length: ' +　members.length);
+      if (members.length > 0) {
+        axios.put(routes.apiRoutes.createGroup, {
+          name: this.groupName,
+          members: members
+        });
+      } else {
+        this.errors.noMembers = true;
+      }
     }
   }
 }
