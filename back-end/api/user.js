@@ -133,22 +133,23 @@ exports.signUp = function(req, res) {
       _id: req.body.userId,
       passwordHash: req.body.password
     });
-    newUser.save(err);
+    newUser.save(function (err) {
 
-    if (err) {
-      res.status(500).json({success: false, reason: 'Database error'});
-      logger('Database error: ' +　err);
-      return;
-    }
+      if (err) {
+        res.status(500).json({success: false, reason: 'Database error'});
+        logger('Database error: ' +　err);
+        return;
+      }
 
-    // creating a session with userId and sending token cookie
-    var sessionCard = sessions.createSession(req.body.userId);
-    res
-      .cookie('sessionId', sessionCard.sessionId, {expire: sessionCard.expireTime})
-      .cookie('securityToken', sessionCard.securityToken, {expire: sessionCard.expireTime})
-      .status(200)
-      .json({success: true, authCard: sessionCard});
-    logger('Sign up successful.');
+      // creating a session with userId and sending token cookie
+      var sessionCard = sessions.createSession(req.body.userId);
+      res
+        .cookie('sessionId', sessionCard.sessionId, {expire: sessionCard.expireTime})
+        .cookie('securityToken', sessionCard.securityToken, {expire: sessionCard.expireTime})
+        .status(200)
+        .json({success: true, authCard: sessionCard});
+      logger('Sign up successful.');
+    });
   })
 }
 
@@ -171,7 +172,11 @@ exports.getGroups =　function(req, res) {
 exports.findUser = function(req, res) {
   logger('Find userId request by ' + sessions.getUserId(req.cookies));
 
-  User.find({_id: req.params.userId}, function(result) {
-      res.status(200).json({success: true, userIds: result});
+  User.find({_id: new RegExp(req.query.userId, 'i')}, function(err, results) {
+      var userIds = [];
+      for (var result of results) {
+        userIds.push(result.id);
+      }
+      res.status(200).json({success: true, userIds: userIds});
     })
 }

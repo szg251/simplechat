@@ -5,12 +5,15 @@
       <input type="text" class="form-control" placeholder="Group name" v-model="groupName">
     </div>
     <div class="form-group">
-      <div class="input-group" v-for="member in members">
-        <input type="text" class="form-control" placeholder="Member"
+      <div class="input-group" v-for="(member, i) in members">
+        <input type="text" list="userIds" class="form-control" placeholder="Member"
             v-model="member.user"
             v-on:keyup="memberKeyup">
+            <datalist id="userIds">
+              <option v-for="userId in userIds" :value="userId"/>
+            </datalist>
             <span class="input-group-btn">
-              <a class="btn btn-default" v-on:click.capture="closeMemberInput" key="close"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+              <a class="btn btn-default" v-on:click.capture="closeMemberInput" :id="'close' + i"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
             </span>
       </div>
     </div>
@@ -29,19 +32,25 @@ export default {
   data() {
     return {
       groupName: '',
-      members: [{user: ''}]
+      members: [{user: ''}],
+      userIds: []
     }
   },
   methods: {
-    memberKeyup: function() {
+    memberKeyup: function(e) {
+      axios.get(routes.apiRoutes.findUser, {userId: e.target.value})
+        .then(results => {
+          this.userIds = results.data.userIds;
+        })
       if (this.members[this.members.length-1].user !== ''){
         this.members.push({user: ''})
       }
     },
     closeMemberInput: function(e) {
-      console.log(e.target.key);
+      var memberId = e.toElement.id.slice(5, e.toElement.length);
+      this.members.splice(memberId, 1);
     },
-    submit: function(e) {
+    submit: function() {
       e.preventDefault();
       var members = [];
       for (var member of this.members){

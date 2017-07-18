@@ -8,6 +8,7 @@ module.exports =　exports = {
     login:        backEndServer + '/login',
     signup:       backEndServer + '/signup',
     getUser:      backEndServer + '/user',
+    findUser:     backEndServer + '/finduser',
     createGroup:  backEndServer + '/group',
     getGroups:    userId  => {return backEndServer + '/user/' + userId + '/groups'},
     logout:       userId  => {return backEndServer + '/user/' + userId + '/logout'},
