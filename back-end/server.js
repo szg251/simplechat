@@ -47,6 +47,7 @@ app.all('/group/:group*', filters.groupFilter);
 app.post('/login', userApi.login);
 app.post('/signup', userApi.signUp);
 app.get('/user', userApi.getUser);
+app.get('/user/:userId/friends', userApi.getFriends);
 app.get('/user/:userId/logout', userApi.logout);
 app.get('/user/:userId/groups', userApi.getGroups);
 app.get('/signup/:userId', userApi.idExists); // not filtered

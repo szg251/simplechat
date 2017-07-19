@@ -5,7 +5,7 @@
         :currentGroup="group"
         :currentUser="currentUser">
     </chat>
-    <new-group class="col-md-3"></new-group>
+    <new-group class="col-md-3" :currentUser="currentUser"></new-group>
   </div>
 </template>
 

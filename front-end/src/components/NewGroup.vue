@@ -13,7 +13,7 @@
             v-on:keyup="memberKeyup"
             v-on:change="checkMember">
             <datalist id="userIds">
-              <option v-for="userId in userIds" :value="userId"/>
+              <option v-for="friend in friends" :value="userId"/>
             </datalist>
             <span class="input-group-btn">
               <a class="btn btn-default" v-on:click="closeMemberInput" :id="'close' + i"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
@@ -36,7 +36,7 @@ export default {
     return {
       groupName: '',
       members: [{user: ''}],
-      userIds: [],
+      friends: [],
       errors: {
         noMembers: false,
         invalidMembers: [],
@@ -44,11 +44,12 @@ export default {
       }
     }
   },
+  props: ['currentUser'],
   methods: {
     memberKeyup: function(e) {
-      axios.get(routes.apiRoutes.findUser, {userId: e.target.value})
+      axios.get(routes.apiRoutes.getFriends(this.currentUser), {userId: e.target.value})
         .then(results => {
-          this.userIds = results.data.userIds;
+          this.userIds = results.data.friends;
         })
       if (this.members[this.members.length-1].user !== ''){
         this.members.push({user: ''})

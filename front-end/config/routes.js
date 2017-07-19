@@ -11,6 +11,7 @@ module.exports =　exports = {
     findUser:     backEndServer + '/finduser',
     createGroup:  backEndServer + '/group',
     getGroups:    userId  => {return backEndServer + '/user/' + userId + '/groups'},
+    getFriends:   userId  => {return backEndServer + '/user/' + userId + '/friends'},
     logout:       userId  => {return backEndServer + '/user/' + userId + '/logout'},
     getMessages:  group   => {return backEndServer + '/group/' + group + '/messages'},
     userExists:   userId  => {return backEndServer + '/signup/' + userId}

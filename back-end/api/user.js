@@ -171,6 +171,7 @@ exports.getGroups =　function(req, res) {
 
 exports.findUser = function(req, res) {
   logger('Find userId request by ' + sessions.getUserId(req.cookies));
+  console.log(req.query);
 
   User.find({_id: new RegExp(req.query.userId, 'i')}, function(err, results) {
       var userIds = [];
@@ -180,3 +181,27 @@ exports.findUser = function(req, res) {
       res.status(200).json({success: true, userIds: userIds});
     })
 }
+
+exports.getFriends = function(req, res) {
+  logger('Get friends request by ' + sessions.getUserId(req.cookies));
+
+  User.findOne({_id: req.params.userId, 'friends._userId': $eq: {req.query.userId})
+    .select('friends._userId')
+    .exec((err, results) => {
+      if (err) {
+        logger('Database error: ' +　err);
+        res.status(500).json({success: false});
+      };
+      var friends = [];
+      if (results != null && results.friends != null) {
+        for (var result of results.friends) {
+          friends.push(result._userId);
+        }
+      }
+
+      res.status(200).json({success: true, friends: friends});
+    });
+    
+}
+
+// db.users.aggregate([{$unwind: "$friends"}, {$match: {"friends._userId": "Gabor"}}, {$Cgroup: {_id: "$friends._userId"}}])
