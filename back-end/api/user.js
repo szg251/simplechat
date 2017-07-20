@@ -233,14 +233,25 @@ exports.getFriendRequests = function(req, res) {
 exports.sendFriendRequest = function(req, res) {
   logger('Send friend request requested by ' +　sessions.getUserId(req.cookies));
 
-  var user =　User.findOne({_id: req.body.friendId});
-  console.log(user);
-  user.friendReqs.push({_userId: req.params.friendId});
-  user.save(function(err) {
-    if (err) {
-      res.status(500).json({success: false});
+  User.findOne({_id: req.body.friendId})
+    .exec((err, user) => {
+    var friendReqExists = false;
+    for (var friendReq of user.friendReqs) {
+      if (friendReq._userId == req.params.userId) {
+        friendReqExists = true;
+      }
+    }
+    if (!friendReqExists) {
+      user.friendReqs.push({_userId: req.params.userId});
+      user.save(function(err) {
+        if (err) {
+          res.status(500).json({success: false});
+        } else {
+          res.status(200).json({success: true});
+        }  
+     });
     } else {
-      res.status(200).json({success: true});
+      res.status(500).json({success: false, reason: 'Friend request by this user already exitst'});
     }
   });
 }

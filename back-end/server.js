@@ -60,6 +60,39 @@ app.get('/group/:group/messages', groupApi.getMessages);
 app.put('/group/:group/messages', groupApi.newMessage);
 app.put('/group', groupApi.createGroup);
 
-const server = app.listen('3001');
+
+//
+//
+// Dummy run
+//
+//
+var dummyReq = {
+  body: {
+    friendId: 'Natsuko'
+  },
+  params: {
+    userId: 'Gergo'
+  }
+}
+
+function DummyRes() {
+  this.statusVar = 0;
+  this.status =　function(status) {
+    this.statusVar = status;
+    return this;
+  },
+  this.json = function(jsonObj) {
+    logger('Dummy run result (' + this.statusVar + ')');
+    logger(JSON.stringify(jsonObj));
+  } 
+}
+
+var dummyRes = new DummyRes();
+
+userApi.sendFriendRequest(dummyReq, dummyRes);
+
+
+
+const server = app.listen('3002');
 const io = socketio(server);
 require('./socket-start')(io)
