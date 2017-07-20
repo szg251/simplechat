@@ -7,9 +7,9 @@ const sessions    = require('../session');
 const groupProc   = require('../procedures/group');
 
 // Models
-const Group       = require('../schemas/group');
-const Message     = require('../schemas/message');
-const User     = require('../schemas/user');
+const Group       = require('../models/group');
+const Message     = require('../models/message');
+const User     = require('../models/user');
 
 
 exports.newMessage = function(req, res) {

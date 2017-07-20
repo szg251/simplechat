@@ -7,13 +7,13 @@
     <div class="form-group">
       <div class="alert alert-danger" v-if="errors.noMembers">You must input at least one member</div>
       <div class="alert alert-danger" v-if="errors.invalidMember">UserId doesn't exist</div>
-      <div class="input-group" v-for="(member, i) in members">
+      <div class="input-group" v-for="(member, i) in members" :key="'member' + i">
         <input type="text" :id="'member' + i" list="userIds" class="form-control" placeholder="Member"
             v-model="member.user"
-            v-on:keyup="memberKeyup"
+            v-on:keyup="memberLookup"
             v-on:change="checkMember">
             <datalist id="userIds">
-              <option v-for="friend in friends" :value="userId"/>
+              <option v-for="(friend, i) in friends" :value="friend" :key="'friend' +　i"/>
             </datalist>
             <span class="input-group-btn">
               <a class="btn btn-default" v-on:click="closeMemberInput" :id="'close' + i"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
@@ -46,10 +46,10 @@ export default {
   },
   props: ['currentUser'],
   methods: {
-    memberKeyup: function(e) {
-      axios.get(routes.apiRoutes.getFriends(this.currentUser), {userId: e.target.value})
+    memberLookup: function(e) {
+      axios.get(routes.apiRoutes.getFriends(this.currentUser), {params: {friendId: e.target.value}})
         .then(results => {
-          this.userIds = results.data.friends;
+          this.friends = results.data.friends;
         })
       if (this.members[this.members.length-1].user !== ''){
         this.members.push({user: ''})

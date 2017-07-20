@@ -4,8 +4,8 @@ const logger      = require('../logger');
 const sessions    = require('../session');
 
 // Models
-const User        = require('../schemas/user');
-const Group        = require('../schemas/group');
+const User        = require('../models/user');
+const Group        = require('../models/group');
 
 /**
   * Checking if userId already exists (mostly before signup)
@@ -185,18 +185,21 @@ exports.findUser = function(req, res) {
 exports.getFriends = function(req, res) {
   logger('Get friends request by ' + sessions.getUserId(req.cookies));
 
-  User.findOne({_id: req.params.userId, 'friends._userId': $eq: {req.query.userId})
-    .select('friends._userId')
+  User.aggregate([
+    {$match: {_id: req.params.userId}},
+    {$unwind: '$friends'}, 
+    {$match: {'friends._userId': new RegExp(req.query.friendId, 'i')}}, 
+    {$group: {_id: "$friends._userId"}}
+  ])
     .exec((err, results) => {
       if (err) {
         logger('Database error: ' +　err);
         res.status(500).json({success: false});
+        return;
       };
       var friends = [];
-      if (results != null && results.friends != null) {
-        for (var result of results.friends) {
-          friends.push(result._userId);
-        }
+      for (var result of results) {
+        friends.push(result._id);
       }
 
       res.status(200).json({success: true, friends: friends});
@@ -204,4 +207,41 @@ exports.getFriends = function(req, res) {
     
 }
 
-// db.users.aggregate([{$unwind: "$friends"}, {$match: {"friends._userId": "Gabor"}}, {$Cgroup: {_id: "$friends._userId"}}])
+exports.getFriendRequests = function(req, res) {
+  logger('Get friend requests requested by ' + sessions.getUserId(req.cookies));
+
+  User.aggregate([
+    {$match: {_id: req.params.userId}},
+    {$unwind: '$friendRequests'},
+    {$group: {_id: '$friendReqs._userId'}}
+  ])
+    .exec((err, results) => {
+      if (err) {
+        logger('Database error: ' +　err);
+        res.status(500).json({success: false});
+        return;
+      };
+      var friendReqs = [];
+      for (var result of results) {
+        friendReqs.push(result._id);
+      }
+
+      res.status(200).json({success: true, friendRequests: friendReqs});
+    });
+}
+
+exports.sendFriendRequest = function(req, res) {
+  logger('Send friend request requested by ' +　sessions.getUserId(req.cookies));
+
+  var user =　User.findOne({_id: req.body.friendId});
+  console.log(user);
+  user.friendReqs.push({_userId: req.params.friendId});
+  user.save(function(err) {
+    if (err) {
+      res.status(500).json({success: false});
+    } else {
+      res.status(200).json({success: true});
+    }
+  });
+}
+

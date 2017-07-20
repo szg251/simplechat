@@ -3,8 +3,8 @@ const logger      = require('../logger');
 const sessions    = require('../session');
 
 // Models
-const User        = require('../schemas/user');
-const Group        = require('../schemas/group');
+const User        = require('../models/user');
+const Group        = require('../models/group');
 
 exports.userFilter =　function(req, res) {
   logger('User authentication filter for: ' + req.originalUrl);
