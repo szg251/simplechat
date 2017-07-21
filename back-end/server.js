@@ -60,6 +60,6 @@ app.get('/group/:group/messages', groupApi.getMessages);
 app.put('/group/:group/messages', groupApi.newMessage);
 app.put('/group', groupApi.createGroup);
 
-const server = app.listen('3002');
+const server = app.listen('3001');
 const io = socketio(server);
 require('./socket-start')(io)

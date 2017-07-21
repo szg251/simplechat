@@ -235,24 +235,80 @@ exports.sendFriendRequest = function(req, res) {
 
   User.findOne({_id: req.body.friendId})
     .exec((err, user) => {
-    var friendReqExists = false;
-    for (var friendReq of user.friendReqs) {
-      if (friendReq._userId == req.params.userId) {
-        friendReqExists = true;
+
+      if (err) {
+        logger('Database error: ' +　err);
+        res.status(500).json({success: false});
+        return;
+      };
+
+      User.aggregate([
+        {$match: {_id: req.body.friendId}},
+        {$unwind: '$friends'},
+        {$match: {'friends._userId': req.params.userId}},
+        {$group: {_id: '$friends._userId'}}
+      ]).exec((err, result) => {
+        if (err || result.length == 0) {
+          res.status(500).json({success: false, reason: 'Database error.'});
+        }
+          var friendReqExists = false;
+          for (var friendReq of user.friendReqs) {
+            if (friendReq._userId == req.params.userId) {
+              friendReqExists = true;
+              break;
+            }
+          }
+          if (!friendReqExists) {
+            user.friendReqs.push({_userId: req.params.userId});
+            user.save(function(err) {
+              if (err) {
+                res.status(500).json({success: false, reason: 'Database error.'});
+              } else {
+                res.status(200).json({success: true});
+              }  
+          });
+      } else {
+        res.status(400).json({success: false, reason: 'Friend request by this user already exists.'});
       }
-    }
-    if (!friendReqExists) {
-      user.friendReqs.push({_userId: req.params.userId});
-      user.save(function(err) {
-        if (err) {
-          res.status(500).json({success: false});
-        } else {
-          res.status(200).json({success: true});
-        }  
-     });
-    } else {
-      res.status(500).json({success: false, reason: 'Friend request by this user already exitst'});
-    }
-  });
+    });
+    
+        });
 }
 
+exports.approveFriendRequest = function(req, res) {
+  logger('Friend request approve requested by ' + sessions.getUserId(req.cookies));
+
+  User.findOne({_id: req.params.userId})
+    .exec((err, user) => {
+
+      if (err) {
+        logger('Database error: ' +　err);
+        res.status(500).json({success: false, reason: 'Database error.'});
+        return;
+      };
+
+      var friendReqIndex = -1;
+      for (var i = 0; i < user.friendReqs.length; i++) {
+        if (user.friendReqs[i]._userId == req.body.friendId) {
+          friendReqIndex = i;
+          break;;
+        }
+      }
+      
+      if (friendReqIndex >= 0) {
+        user.friends.push({_userId: user.friendReqs[friendReqIndex]._userId});
+        user.friendReqs.splice(friendReqIndex, 1);
+        user.save();
+        res.status(200).json({success: true});
+      } else {
+        res.status(400).json({success: false, reason: 'Friend request doesn\'t exists.'});
+      }
+
+    });
+}
+
+exports.cancelFriendRequest = function(req, res) {
+  logger('Cancel friend request requested by ' + sessions.getUserId(req.cookies));
+
+
+}
