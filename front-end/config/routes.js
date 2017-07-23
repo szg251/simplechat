@@ -7,13 +7,19 @@ module.exports =　exports = {
   apiRoutes: {
     login:              backEndServer + '/login',
     signup:             backEndServer + '/signup',
+    logout:             userId  => {return backEndServer + '/user/' + userId + '/logout'},
+
     getUser:            backEndServer + '/user',
-    findUser:           backEndServer + '/finduser',
+    findUser:           backEndServer + '/finduser', 
+    getFriends:         userId  => {return backEndServer + '/user/' + userId + '/friends'},
+
+    getFriendRequests:  userId  => {return backEndServer + '/user/' + userId + '/friendreqs'},
+    sendFriendRequest:  userId  => {return backEndServer + '/user/' + userId + '/friendreqs'},
+    deleteFriendRequest:  userId  => {return backEndServer + '/user/' + userId + '/friendreqs'},
+    approveFriendRequest:  userId  => {return backEndServer + '/user/' + userId + '/approvereqs'},
+    
     createGroup:        backEndServer + '/group',
     getGroups:          userId  => {return backEndServer + '/user/' + userId + '/groups'},
-    getFriends:         userId  => {return backEndServer + '/user/' + userId + '/friends'},
-    getFriendRequests:  userId  => {return backEndServer + '/user/' + userId + '/friendreqs'},
-    logout:             userId  => {return backEndServer + '/user/' + userId + '/logout'},
     getMessages:        group   => {return backEndServer + '/group/' + group + '/messages'},
     userExists:         userId  => {return backEndServer + '/signup/' + userId}
   }

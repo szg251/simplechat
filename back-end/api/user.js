@@ -5,6 +5,7 @@ const sessions    = require('../session');
 
 // Models
 const User        = require('../models/user');
+const FriendReq   = require('../models/friendreq')
 const Group        = require('../models/group');
 
 /**
@@ -187,8 +188,8 @@ exports.getFriends = function(req, res) {
 
   User.aggregate([
     {$match: {_id: req.params.userId}},
-    {$unwind: '$friends'}, 
-    {$match: {'friends._userId': new RegExp(req.query.friendId, 'i')}}, 
+    {$unwind: '$friends'},
+    {$match: {'friends._userId': new RegExp(req.query.friendId, 'i')}},
     {$group: {_id: "$friends._userId"}}
   ])
     .exec((err, results) => {
@@ -204,27 +205,19 @@ exports.getFriends = function(req, res) {
 
       res.status(200).json({success: true, friends: friends});
     });
-    
+
 }
 
 exports.getFriendRequests = function(req, res) {
   logger('Get friend requests requested by ' + sessions.getUserId(req.cookies));
 
-  User.aggregate([
-    {$match: {_id: req.params.userId}},
-    {$unwind: '$friendRequests'},
-    {$group: {_id: '$friendReqs._userId'}}
-  ])
-    .exec((err, results) => {
+  FriendReq.find({_requestee: req.params.userId})
+    .exec((err, friendReqs) => {
       if (err) {
         logger('Database error: ' +　err);
         res.status(500).json({success: false});
         return;
       };
-      var friendReqs = [];
-      for (var result of results) {
-        friendReqs.push(result._id);
-      }
 
       res.status(200).json({success: true, friendRequests: friendReqs});
     });
@@ -233,53 +226,67 @@ exports.getFriendRequests = function(req, res) {
 exports.sendFriendRequest = function(req, res) {
   logger('Send friend request requested by ' +　sessions.getUserId(req.cookies));
 
+  // Check if user exists
   User.findOne({_id: req.body.friendId})
     .exec((err, user) => {
-
       if (err) {
         logger('Database error: ' +　err);
-        res.status(500).json({success: false});
+        res.status(500).json({success: false, reason: 'Database error.'});
         return;
       };
 
-      User.aggregate([
-        {$match: {_id: req.body.friendId}},
-        {$unwind: '$friends'},
-        {$match: {'friends._userId': req.params.userId}},
-        {$group: {_id: '$friends._userId'}}
-      ]).exec((err, result) => {
-        if (err || result.length == 0) {
-          res.status(500).json({success: false, reason: 'Database error.'});
-        }
-          var friendReqExists = false;
-          for (var friendReq of user.friendReqs) {
-            if (friendReq._userId == req.params.userId) {
-              friendReqExists = true;
-              break;
-            }
-          }
-          if (!friendReqExists) {
-            user.friendReqs.push({_userId: req.params.userId});
-            user.save(function(err) {
-              if (err) {
-                res.status(500).json({success: false, reason: 'Database error.'});
-              } else {
-                res.status(200).json({success: true});
-              }  
-          });
-      } else {
-        res.status(400).json({success: false, reason: 'Friend request by this user already exists.'});
+      if (user == null) {
+        res.status(400).json({status: false, reason: 'Friend doesn\'t exist.'})
+        return;
       }
-    });
-    
+
+      // check if user if friend already
+      var alreadyFriend = false;
+      for (var i = 0; i < user.friends.length; i++) {
+        if (user.friends[i]._userId == req.params.userId) {
+          alreadyFriend = true;
+          break;
+        }
+      }
+
+      if (alreadyFriend) {
+        res.status(400).json({success: false, reason: 'This user is already your friend.'});
+        return;
+      }
+
+      // Looking for existing request
+      FriendReq.count({_requester: req.params.userId, _requestee: req.body.friendId})
+        .exec((err, friendReqCount) => {
+        if (err) {
+          res.status(500).json({success: false, reason: 'Database error.'});
+          return;
+        }
+        console.log(friendReqCount);
+          
+        if (friendReqCount !== 0) {
+          res.status(400).json({success: false, reason: 'Friend request by this user already exists.'});
+          return;
+        }
+        var newRequest = new FriendReq({
+          _requester: req.params.userId,
+          _requestee: req.body.friendId
         });
+        newRequest.save(function(err) {
+          if (err) {
+            res.status(500).json({success: false, reason: 'Database error.'});
+          } else {
+            res.status(200).json({success: true});
+          }
+        });
+    });
+  });
 }
 
 exports.approveFriendRequest = function(req, res) {
   logger('Friend request approve requested by ' + sessions.getUserId(req.cookies));
 
-  User.findOne({_id: req.params.userId})
-    .exec((err, user) => {
+  FriendReq.findOneAndRemove({_requester: req.body.friendId, _requestee: req.params.userId})
+    .exec((err, friendReq) => {
 
       if (err) {
         logger('Database error: ' +　err);
@@ -287,28 +294,64 @@ exports.approveFriendRequest = function(req, res) {
         return;
       };
 
-      var friendReqIndex = -1;
-      for (var i = 0; i < user.friendReqs.length; i++) {
-        if (user.friendReqs[i]._userId == req.body.friendId) {
-          friendReqIndex = i;
-          break;;
-        }
-      }
-      
-      if (friendReqIndex >= 0) {
-        user.friends.push({_userId: user.friendReqs[friendReqIndex]._userId});
-        user.friendReqs.splice(friendReqIndex, 1);
-        user.save();
-        res.status(200).json({success: true});
-      } else {
+      if (friendReq == null) {
         res.status(400).json({success: false, reason: 'Friend request doesn\'t exists.'});
+        return;
       }
 
+      User.findOne({_id: req.body.friendId}).exec((err, friend) => {
+        if (err) {
+          logger('Database error: ' +　err);
+          // res.status(500).json({success: false, reason: 'Database error.'});
+          return;
+        };
+        User.findOne({_id: req.params.userId}).exec((err, user) => {
+        if (err) {
+          logger('Database error: ' +　err);
+          // res.status(500).json({success: false, reason: 'Database error.'});
+          return;
+        };
+
+        user.friends.push({_userId: req.body.friendId});
+        user.save();
+
+        friend.friends.push({_userId: req.params.userId});
+        friend.save();
+
+        res.status(200).json({success: true});
+      });
+    }); 
     });
 }
 
 exports.cancelFriendRequest = function(req, res) {
   logger('Cancel friend request requested by ' + sessions.getUserId(req.cookies));
 
+  FriendReq.findOneAndRemove({_requester: req.params.userId, _requestee: req.body.friendId})
+    .exec((err, friend) => {
+      if (err) {
+        logger('Database error: ' +　err);
+        res.status(500).json({success: false, reason: 'Database error.'});
+        return;
+      };
+      
+      res.status(200).json({success: true});
+  });
 
-}
+};
+
+exports.declineFriendRequest = function(req, res) {
+  logger('Cancel friend request requested by ' + sessions.getUserId(req.cookies));
+
+  FriendReq.findOneAndRemove({_requester: req.body.friendId, _requestee: req.params.userId})
+    .exec((err, friend) => {
+      if (err) {
+        logger('Database error: ' +　err);
+        res.status(500).json({success: false, reason: 'Database error.'});
+        return;
+      };
+      
+      res.status(200).json({success: true});
+  });
+
+};

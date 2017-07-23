@@ -6,15 +6,9 @@ const friendSchema = new Schema({
   connectDate: {type: Date, default: Date.now}
  });
 
-const friendRequestSchema = new Schema({
-  _userId: {type: String, ref: 'User'},
-  requestDate: {type: Date, default: Date.now}
-});
-
 const userSchema = new Schema({
   _id: String,
   passwordHash: String,
-  friendReqs: [friendRequestSchema],
   friends: [friendSchema],
   createDate: {type: Date, default: Date.now}
 });

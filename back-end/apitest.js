@@ -34,20 +34,21 @@ var res = new DummyResponse();
 
 //******************************************************************* */
 
-//Friend request
-var req = {
-  body: {
-    friendId: 'Natsuko'
-  },
-  params: {
-    userId: 'Gergo'
-  }
-}
+// //Friend request
+// var req = {
+//   params: {
+//     userId: 'Gergo'
+//   },
+//   body: {
+//     friendId: 'Natsuko'
+//   }
+// }
 
-userApi.sendFriendRequest(req, res);
+// userApi.sendFriendRequest(req, res);
+// userApi.cancelFriendRequest(req, res);
 
 
-// Friend request approval
+// // Friend request approval
 // var req = {
 //   body: {
 //     friendId: 'Gergo'
@@ -69,3 +70,5 @@ userApi.sendFriendRequest(req, res);
 //   }
 // }
 // userApi.cancelFriendRequest(req, res);
+
+// mongoose.disconnect();

@@ -7,8 +7,10 @@
           <li v-if="!isLoggedin"><router-link to="/login">Login</router-link></li>
           <li v-if="!isLoggedin"><router-link to="/signup">Sign up</router-link></li>
           <li v-if="isLoggedin"><router-link to="/chat">Chat</router-link></li>
+          <li v-if="isLoggedin"><router-link to="/user/friends">Friends</router-link></li>
           <li v-if="isLoggedin"><a href="#" v-on:click="logout">Logout</a></li>
         </ul>
+      <div class="navbar-text">{{currentUser}}</div>
       </div>
     </div>
     <router-view :currentUser="currentUser"></router-view>
