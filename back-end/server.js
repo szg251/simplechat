@@ -50,10 +50,11 @@ app.get('/user', userApi.getUser);
 app.get('/user/:userId/friends', userApi.getFriends);
 
 app.get('/user/:userId/friendreqs', userApi.getFriendRequests);
+app.get('/user/:userId/myfriendreqs', userApi.getMyFriendRequests);
 app.put('/user/:userId/friendreqs', userApi.sendFriendRequest);
 app.delete('/user/:userId/friendreqs', userApi.cancelFriendRequest);
-app.delete('/user/:userId/declinefriendreqs', userApi.declineFriendRequest);
-app.post('/user/:userId/approvereqs', userApi.approveFriendRequest);
+app.delete('/user/:userId/declinefriendreq', userApi.declineFriendRequest);
+app.post('/user/:userId/approvefriendreqs', userApi.approveFriendRequest);
 
 app.get('/user/:userId/logout', userApi.logout);
 app.get('/user/:userId/groups', userApi.getGroups);

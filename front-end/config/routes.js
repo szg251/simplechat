@@ -14,9 +14,11 @@ module.exports =　exports = {
     getFriends:         userId  => {return backEndServer + '/user/' + userId + '/friends'},
 
     getFriendRequests:  userId  => {return backEndServer + '/user/' + userId + '/friendreqs'},
+    getMyFriendRequests:  userId  => {return backEndServer + '/user/' + userId + '/myfriendreqs'},
     sendFriendRequest:  userId  => {return backEndServer + '/user/' + userId + '/friendreqs'},
     deleteFriendRequest:  userId  => {return backEndServer + '/user/' + userId + '/friendreqs'},
-    approveFriendRequest:  userId  => {return backEndServer + '/user/' + userId + '/approvereqs'},
+    approveFriendRequest:  userId  => {return backEndServer + '/user/' + userId + '/approvefriendreq'},
+    declineFriendRequest:  userId  => {return backEndServer + '/user/' + userId + '/declinefriendreq'},
     
     createGroup:        backEndServer + '/group',
     getGroups:          userId  => {return backEndServer + '/user/' + userId + '/groups'},

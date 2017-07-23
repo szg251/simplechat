@@ -223,6 +223,22 @@ exports.getFriendRequests = function(req, res) {
     });
 }
 
+
+exports.getMyFriendRequests = function(req, res) {
+  logger('Get my friend requests requested by ' + sessions.getUserId(req.cookies));
+
+  FriendReq.find({_requester: req.params.userId})
+    .exec((err, friendReqs) => {
+      if (err) {
+        logger('Database error: ' +　err);
+        res.status(500).json({success: false});
+        return;
+      };
+
+      res.status(200).json({success: true, friendRequests: friendReqs});
+    });
+}
+
 exports.sendFriendRequest = function(req, res) {
   logger('Send friend request requested by ' +　sessions.getUserId(req.cookies));
 
@@ -340,8 +356,11 @@ exports.cancelFriendRequest = function(req, res) {
 
 };
 
+// TODO rename to reject
 exports.declineFriendRequest = function(req, res) {
-  logger('Cancel friend request requested by ' + sessions.getUserId(req.cookies));
+  logger('Decline friend request requested by ' + sessions.getUserId(req.cookies));
+  console.log(req.params.userId)
+  console.log(req.body.friendId)
 
   FriendReq.findOneAndRemove({_requester: req.body.friendId, _requestee: req.params.userId})
     .exec((err, friend) => {
@@ -350,7 +369,13 @@ exports.declineFriendRequest = function(req, res) {
         res.status(500).json({success: false, reason: 'Database error.'});
         return;
       };
-      
+
+      if (friend == null) {
+        logger('Database error: ' +　err);
+        res.status(400).json({success: false, reason: 'Friend request doesn/t exist.'});
+        return;
+      }
+
       res.status(200).json({success: true});
   });
 
