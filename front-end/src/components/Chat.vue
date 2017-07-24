@@ -1,37 +1,31 @@
 <template>
-  <!-- <div>
-    <transition name="slide"> -->
-      <div v-if="isChatVisible" class="col-xs-5 col-sm-4 col-md-3 chat-panel">
-        <h2>{{groupName}}</h2>
-        <ul>
-          <li v-for="(member, i) in members" :key="'member' + i">
-            <router-link :to="'/user/friend/' + member">{{member}}</router-link>
-          </li>
-        </ul>
-
-        <div v-for="(message, i) in messages" :key="'message' + i">
-          <small>{{message.user}} - {{message.time}}</small>
-          <div :class="{msgFromOther: message.user != currentUser}">
-            {{message.text}}
-          </div>
-        </div>
-
-        <form>
-          <div class="input-group">
-              <input class="form-control" type="text"
-                placeholder="メッセージを入力してください" v-model="newMsg">
-              <span class="input-group-btn">
-                <input class="btn btn-primary" type="submit"
-                  value="送信" v-on:click="addMsg">
-              </span>
-          </div>
-        </form>
-
+  <div class="chat-panel">
+    <div class="chat-panel-header">
+      <h4>{{groupName}}</h4>
+      <ul>
+        <li v-for="(member, i) in members" :key="'member' + i">
+          <router-link :to="'/user/friend/' + member">{{member}}</router-link>
+        </li>
+      </ul>
+    </div>
+    <div class="chat-panel-body">
+      <div v-for="(message, i) in messages" :key="'message' + i"
+          :class="{msgFromOther: message.user != currentUser}"  >
+        <small>{{message.user}} - {{message.time}}</small>
+        <div>{{message.text}}</div>
       </div>
-    </transition>
-    <!-- <transition>
-      <button class="chat-btn btn" v-on:click="toggleChat">{{isChatVisible ? '<' : '>'}}</button>
-    </transition> -->
+
+      <form>
+        <div class="input-group">
+            <input class="form-control" type="text"
+              placeholder="Write some message..." v-model="newMsg">
+            <span class="input-group-btn">
+              <input class="btn btn-primary" type="submit"
+                value="Send" v-on:click="addMsg">
+            </span>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -58,6 +52,11 @@ export default {
     }
   },
   props: ['currentGroup', 'currentUser'],
+  watch: {
+    currentGroup: function() {
+      this.getGroupData();
+    }
+  },
   created: function() {
 
     socket = io.connect(routes.socketRoute, {
@@ -72,19 +71,23 @@ export default {
     socket.on('newMsg', (data) => {
       this.messages.push(data);
     });
-
-    axios.get(routes.apiRoutes.getMessages(this.currentGroup))
-      .then(response => {
-        this.messages = response.data.messages;
-    });
-
-    axios.get(routes.apiRoutes.getGroup(this.currentGroup))
-      .then(response => {
-        this.groupName = response.data.group.name,
-        this.members = response.data.group.members
-    });
+    if (this.currentGroup != '') {
+      this.getGroupData();
+    }
   },
   methods: {
+    getGroupData: function() {
+      axios.get(routes.apiRoutes.getGroup(this.currentGroup))
+        .then(response => {
+          this.groupName = response.data.group.name,
+          this.members = response.data.group.members
+      });
+
+      axios.get(routes.apiRoutes.getMessages(this.currentGroup))
+        .then(response => {
+          this.messages = response.data.messages;
+      });
+    },
     addMsg: function (e) {
       e.preventDefault();
       var newMsg = {
@@ -109,26 +112,15 @@ export default {
 <style scoped>
   .chat-panel {
     background-color: LightGray;
-    height: 90vh;
-    overflow-y: scroll;
+    border-radius: 10px;
+    padding: 10px;
   }
-
-  .chat-btn {
-    height: 90vh;
-    color: white;
-    font-weight: bold;
-    padding: 2px;
+  .chat-panel-body {
+    overflow-y: scroll;
   }
 
   .msgFromOther {
     text-align: right;
     color: DarkBlue;
-  }
-
-  .slide-enter-active, .slide-leave-active {
-    transition: all .1s
-  }
-  .slide-enter, .slide-leave-to  {
-    width: 0;
   }
 </style>
