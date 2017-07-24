@@ -2,7 +2,9 @@
   <div class="container">
     <h2>Friends</h2>
     <ul>
-      <li v-for="(friend, i) in friends" :key="'friend' +　i">{{friend}}</li>
+      <li v-for="(friend, i) in friends" :key="'friend' +　i">
+        <router-link :to="'/user/friend/' + friend">{{friend}}</router-link>
+      </li>
     </ul>
     <h2>Friend requests</h2>
     <ul>
@@ -24,7 +26,7 @@
       <input type="submit" class="btn btn-primary" v-on:click="sendReq">
     </form>
   </div>
-  
+
 </template>
 
 <script>
@@ -47,7 +49,7 @@ export default {
       this.getUserData();
     }
   },
-  watch: { 
+  watch: {
     currentUser: function() {
       this.getUserData();
     }
@@ -56,7 +58,7 @@ export default {
     sendReq: function(e) {
       e.preventDefault();
       let friendIds = this.newFriend.split(' ');
-      
+
       for (var i = 0; i　< friendIds.length; i++) {
         axios.put(routes.apiRoutes.sendFriendRequest(this.currentUser), {friendId: friendIds[i]})
           .then(result => {
@@ -64,7 +66,7 @@ export default {
               this.pendingReqs.push(result.data.requestee);
               this.newFriend = '';
             }
-          }); 
+          });
       }
     },
     approveReq: function(e) {
@@ -91,7 +93,7 @@ export default {
       axios.delete(routes.apiRoutes.cancelFriendRequest(this.currentUser), {data: {friendId: friendId}})
         .then(result => {
           if (result.data.success) {
-            this.pendingReqs.splice(e.target.parentNode.id.substring(10,11), 1); 
+            this.pendingReqs.splice(e.target.parentNode.id.substring(10,11), 1);
           }
         })
     },

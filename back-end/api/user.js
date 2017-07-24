@@ -26,21 +26,47 @@ exports.idExists = function(req, res) {
 exports.getUser =　function(req, res) {
   logger('User information request.');
 
-  User.findOne({_id: sessions.getUserId(req.cookies)}, function(err, user) {
-    try {
-      if (err) {
-        throw err;
-      }
-
-      var userInfo =　{
-        userId: user._id
-      }
-      res.json({success: true, userInfo: userInfo});
-
-    } catch(err) {
+  User.findOne({_id: sessions.getUserId(req.cookies)}).exec((err, user) => {
+    if (err) {
       logger('Database error: ' + err);
       res.status(400).json({success: false});
     }
+
+    var userInfo =　{
+      userId: user._id,
+      fullname: user.fullname,
+      introduction: user.introduction,
+      imageSrc: user.imageSrc
+    }
+    res.json({success: true, userInfo: userInfo});
+  })
+}
+
+exports.getFriend =　function(req, res) {
+  logger('Friend information request.');
+
+// left join ($lookup) is not working in the current version of MongoDB (v2.6)
+  User.aggregate(
+    {$match: {_id: req.params.friendId}},
+    {$unwind: '$friends'},
+    {$match: {"friends._userId": req.params.userId}},
+    {$project: {
+      _id: 1,
+      fullname: "$fullname",
+      introduction: "$introduction",
+      imageSrc: "$imageSrc"
+    }} ).exec((err, user) => {
+
+      if (err) {
+        logger('Database error: ' + err);
+        res.status(500).json({success: false, reason: 'Database error.'});
+      }
+
+      if (user.length === 0) {
+        res.status(400).json({success: false, reason: 'Friend not found.'});
+      }
+
+      res.json({success: true, friend: user[0]});
   })
 }
 
@@ -190,14 +216,15 @@ exports.getFriends = function(req, res) {
     {$match: {_id: req.params.userId}},
     {$unwind: '$friends'},
     {$match: {'friends._userId': new RegExp(req.query.friendId, 'i')}},
-    {$group: {_id: "$friends._userId"}}
-  ])
-    .exec((err, results) => {
+    {$project: {_id: "$friends._userId"}}
+  ]).exec((err, results) => {
+
       if (err) {
         logger('Database error: ' +　err);
         res.status(500).json({success: false});
         return;
       };
+
       var friends = [];
       for (var result of results) {
         friends.push(result._id);
@@ -277,7 +304,7 @@ exports.sendFriendRequest = function(req, res) {
           res.status(500).json({success: false, reason: 'Database error.'});
           return;
         }
-          
+
         if (friendReqCount !== 0) {
           res.status(400).json({success: false, reason: 'Friend request by this user already exists.'});
           return;
@@ -339,7 +366,7 @@ exports.approveFriendRequest = function(req, res) {
 
         res.status(200).json({success: true});
       });
-    }); 
+    });
     });
 }
 
@@ -353,7 +380,7 @@ exports.cancelFriendRequest = function(req, res) {
         res.status(500).json({success: false, reason: 'Database error.'});
         return;
       };
-      
+
       res.status(200).json({success: true});
   });
 

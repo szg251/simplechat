@@ -8,6 +8,7 @@ import Groups from './components/Groups'
 import SignUp from './components/user/SignUp'
 import Login from './components/user/Login'
 import Friends from './components/user/Friends'
+import Friend from './components/user/Friend'
 import MainPage from './components/MainPage'
 
 Vue.config.productionTip = false
@@ -19,7 +20,8 @@ const routes = [
   {path: '/chat', component: Groups},
   {path: '/signup', component: SignUp},
   {path: '/login', component: Login},
-  {path: '/user/friends', component: Friends}
+  {path: '/user/friends', component: Friends},
+  {path: '/user/friend/:friendId', component: Friend, props: true}
 ]
 
 const router = new VueRouter({

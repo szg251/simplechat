@@ -9,6 +9,9 @@ const friendSchema = new Schema({
 const userSchema = new Schema({
   _id: String,
   passwordHash: String,
+  fullname: String,
+  introduction: String,
+  imageSrc: String,
   friends: [friendSchema],
   createDate: {type: Date, default: Date.now}
 });

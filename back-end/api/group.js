@@ -1,5 +1,4 @@
 // Dependencies
-const basicAuth   = require('basic-auth');
 const logger      = require('../logger');
 const sessions    = require('../session');
 
@@ -27,6 +26,19 @@ exports.getMessages = function(req, res) {
     res.json({success: true, messages: result});
   });
 };
+
+exports.getGroup = function(req, res) {
+  logger('Get group request by ' + sessions.getUserId(req.cookies));
+  
+  Group.findOne({_id: req.params.group}, function(err, result) {
+    if (err) {
+      logger('Database error: ' + err);
+      res.status(500).json({success: false});
+      return;
+    }
+    res.status(200).json({success: true, group: result});
+  });
+}
 
 exports.createGroup = function(req, res) {
   logger('Group creation request.');

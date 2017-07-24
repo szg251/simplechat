@@ -2,9 +2,14 @@
   <!-- <div>
     <transition name="slide"> -->
       <div v-if="isChatVisible" class="col-xs-5 col-sm-4 col-md-3 chat-panel">
-        <h2>{{currentUser}}</h2>
+        <h2>{{groupName}}</h2>
+        <ul>
+          <li v-for="(member, i) in members" :key="'member' + i">
+            <router-link :to="'/user/friend/' + member">{{member}}</router-link>
+          </li>
+        </ul>
 
-        <div v-for="message in messages">
+        <div v-for="(message, i) in messages" :key="'message' + i">
           <small>{{message.user}} - {{message.time}}</small>
           <div :class="{msgFromOther: message.user != currentUser}">
             {{message.text}}
@@ -47,14 +52,15 @@ export default {
       messages: [],
       isChatVisible: true,
       sessionId: '',
-      securityToken: ''
+      securityToken: '',
+      groupName: '',
+      members: []
     }
   },
   props: ['currentGroup', 'currentUser'],
   created: function() {
 
     socket = io.connect(routes.socketRoute, {
-      // TODO socket authentication
       query: {
             sessionId: this.sessionId,
             securityToken: this.securityToken
@@ -65,13 +71,18 @@ export default {
 
     socket.on('newMsg', (data) => {
       this.messages.push(data);
-    })
+    });
 
-    axios.get(routes.apiRoutes.getMessages(this.currentGroup),
-      {withCredentials: true})
+    axios.get(routes.apiRoutes.getMessages(this.currentGroup))
       .then(response => {
         this.messages = response.data.messages;
-      })
+    });
+
+    axios.get(routes.apiRoutes.getGroup(this.currentGroup))
+      .then(response => {
+        this.groupName = response.data.group.name,
+        this.members = response.data.group.members
+    });
   },
   methods: {
     addMsg: function (e) {

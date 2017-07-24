@@ -28,7 +28,7 @@ function DummyResponse() {
   this.json = function(jsonObj) {
     logger('Dummy run result (' + this.statusVar + ')');
     logger(JSON.stringify(jsonObj));
-  } 
+  }
 }
 var res = new DummyResponse();
 
@@ -71,4 +71,21 @@ var res = new DummyResponse();
 // }
 // userApi.cancelFriendRequest(req, res);
 
-// mongoose.disconnect();
+// // Get frien
+// var req = {
+//   body: {
+//     friendId: 'Natsuko'
+//   },
+//   params: {
+//     userId: 'Gergo'
+//   }
+// }
+// userApi.getFriend(req, res);
+
+// // Get group
+// var req = {
+//   params: {
+//     group: '596c57d82972e57353ffa7e7'
+//   }
+// }
+// groupApi.getGroup(req, res);
