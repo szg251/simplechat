@@ -21,7 +21,7 @@
       <div class="form-group">
         <input class="form-control" type="text" v-model="newFriend">
       </div>
-      <input type="submit" class="btn btn-primary" v-on:click="sendFriendRequest">
+      <input type="submit" class="btn btn-primary" v-on:click="sendReq">
     </form>
   </div>
   
@@ -53,32 +53,47 @@ export default {
     }
   },
   methods: {
-    sendFriendRequest: function(e) {
+    sendReq: function(e) {
       e.preventDefault();
-      var friendIds = this.newFriend.split(' ');
+      let friendIds = this.newFriend.split(' ');
       
       for (var i = 0; i　< friendIds.length; i++) {
-        axios.put(routes.apiRoutes.sendFriendRequest(this.currentUser), {friendId: friendIds[i]}); 
+        axios.put(routes.apiRoutes.sendFriendRequest(this.currentUser), {friendId: friendIds[i]})
+          .then(result => {
+            if (result.data.success) {
+              this.pendingReqs.push(result.data.requestee);
+              this.newFriend = '';
+            }
+          }); 
       }
-      this.newFriend = '';
     },
     approveReq: function(e) {
       var friendId = this.friendReqs[e.target.parentNode.id.substring(9,10)];
-      axios.post(routes.apiRoutes.approveFriendRequest(this.currentUser), {friendId: friendId});
-      this.friendReqs.splice(e.target.parentNode.id.substring(9,10), 1);
-      this.friends.push(friendId);
+      axios.post(routes.apiRoutes.approveFriendRequest(this.currentUser), {friendId: friendId})
+        .then(result => {
+          if (result.data.success) {
+            this.friendReqs.splice(e.target.parentNode.id.substring(9,10), 1);
+            this.friends.push(friendId);
+          }
+      })
     },
     declineReq: function (e) {
       var friendId = this.friendReqs[e.target.parentNode.id.substring(9,10)];
-      axios.delete(routes.apiRoutes.declineFriendRequest(this.currentUser), {friendId: friendId});
-      this.friendReqs.splice(e.target.parentNode.id.substring(9,10), 1);
-      this.friends.push(friendId);      
+      axios.delete(routes.apiRoutes.declineFriendRequest(this.currentUser), {data: {friendId: friendId}})
+        .then(result => {
+          if (result.data.success) {
+            this.friendReqs.splice(e.target.parentNode.id.substring(9,10), 1);
+          }
+      })
     },
     cancelReq: function (e) {
       var friendId = this.pendingReqs[e.target.parentNode.id.substring(10,11)];
-      axios.delete(routes.apiRoutes.cancelFriendRequest(this.currentUser), {friendId: friendId});
-      this.pendingReqs.splice(e.target.parentNode.id.substring(10,11), 1);
-      this.friends.push(friendId);      
+      axios.delete(routes.apiRoutes.cancelFriendRequest(this.currentUser), {data: {friendId: friendId}})
+        .then(result => {
+          if (result.data.success) {
+            this.pendingReqs.splice(e.target.parentNode.id.substring(10,11), 1); 
+          }
+        })
     },
     getUserData: function() {
       axios.get(routes.apiRoutes.getFriends(this.currentUser))

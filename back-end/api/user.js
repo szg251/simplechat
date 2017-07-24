@@ -277,7 +277,6 @@ exports.sendFriendRequest = function(req, res) {
           res.status(500).json({success: false, reason: 'Database error.'});
           return;
         }
-        console.log(friendReqCount);
           
         if (friendReqCount !== 0) {
           res.status(400).json({success: false, reason: 'Friend request by this user already exists.'});
@@ -287,11 +286,15 @@ exports.sendFriendRequest = function(req, res) {
           _requester: req.params.userId,
           _requestee: req.body.friendId
         });
-        newRequest.save(function(err) {
+        newRequest.save(err => {
           if (err) {
             res.status(500).json({success: false, reason: 'Database error.'});
           } else {
-            res.status(200).json({success: true});
+            res.status(200).json({
+              success: true,
+              requester: req.params.userId,
+              requestee: req.body.friendId
+            });
           }
         });
     });

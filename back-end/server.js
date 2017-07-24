@@ -54,7 +54,7 @@ app.get('/user/:userId/myfriendreqs', userApi.getMyFriendRequests);
 app.put('/user/:userId/friendreqs', userApi.sendFriendRequest);
 app.delete('/user/:userId/friendreqs', userApi.cancelFriendRequest);
 app.delete('/user/:userId/declinefriendreq', userApi.declineFriendRequest);
-app.post('/user/:userId/approvefriendreqs', userApi.approveFriendRequest);
+app.post('/user/:userId/approvefriendreq', userApi.approveFriendRequest);
 
 app.get('/user/:userId/logout', userApi.logout);
 app.get('/user/:userId/groups', userApi.getGroups);
