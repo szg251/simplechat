@@ -40,18 +40,36 @@ export default {
     }
   },
   created: function() {
-    axios.get(routes.apiRoutes.getUser)
-      .then(response => {
-        this.currentUser = response.data.userInfo.userId;
-        this.isLoggedin = true;
-      });
+    if (document.cookie) {
+      axios.get(routes.apiRoutes.getUser)
+        .then(response => {
+          this.currentUser = response.data.userInfo.userId;
+          this.isLoggedin = true;
+        });
+    }
   },
   watch: {
     '$route': function() {
       axios.get(routes.apiRoutes.getUser)
         .then(response => {
-          this.currentUser = response.data.userInfo.userId;
-          this.isLoggedin = true;
+          
+          if (response.data.success) {
+            this.currentUser = response.data.userInfo.userId;
+            this.isLoggedin = true;
+          } else {
+            // var cookies = document.cookie.split(';');
+            // document.cookie = '';
+            // for (var i = 0; i < cookies.length; i++) {
+            //   var eqPos = cookies[i].lastIndexOf('=');
+            //   var name = cookies[i].substring(0, eqPos);
+            //   if (name !== 'sessionId' && name !== 'securityToken') {
+            //     document.cookie += cookies[i];
+            //   }
+
+            // }
+
+            this.$router.push('/');
+          }
         });
     }
   }

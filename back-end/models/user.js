@@ -8,7 +8,7 @@ const friendSchema = new Schema({
 
 const userSchema = new Schema({
   _id: String,
-  passwordHash: String,
+  pass: String,
   fullname: String,
   introduction: String,
   imageSrc: String,

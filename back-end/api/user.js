@@ -1,12 +1,19 @@
 // Dependencies
-const basicAuth   = require('basic-auth');
 const logger      = require('../logger');
 const sessions    = require('../session');
+const crypto      = require('crypto');
 
 // Models
 const User        = require('../models/user');
 const FriendReq   = require('../models/friendreq')
 const Group        = require('../models/group');
+
+function processPass(pass) {
+  const secret = 'abcdefg';
+  return crypto.createHmac('sha256', secret)
+                   .update('I love cupcakes')
+                   .digest('hex');
+}
 
 /**
   * Checking if userId already exists (mostly before signup)
@@ -94,7 +101,7 @@ exports.login = function(req, res) {
   // Otherwise, get from database
   User.findOne({
     _id: req.body.userId,
-    passwordHash: req.body.password
+    pass: processPass(req.body.password)
   }, function(err, result) {
 
     if (err == null && result !== null) {
@@ -158,7 +165,7 @@ exports.signUp = function(req, res) {
     }
     var newUser = new User({
       _id: req.body.userId,
-      passwordHash: req.body.password
+      pass: processPass(req.body.password)
     });
     newUser.save(function (err) {
 

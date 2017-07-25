@@ -2,7 +2,6 @@
 const express       = require('express');
 const bodyParser    = require('body-parser');
 const logger        = require('./logger');
-const basicAuth     = require('basic-auth');
 const mongoose      = require('mongoose');
 const socketio      = require('socket.io');
 const cors          = require('cors');
