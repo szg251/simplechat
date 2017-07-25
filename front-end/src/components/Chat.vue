@@ -34,6 +34,7 @@
 import axios from 'axios'
 import routes from '../../config/routes'
 import io from 'socket.io-client'
+import cryptMsg from '../../security'
 
 var socket;
 axios.defaults.withCredentials = true;
@@ -68,8 +69,8 @@ export default {
 
     socket.emit('join group', this.currentGroup);
 
-    socket.on('newMsg', (data) => {
-      this.messages.push(data);
+    socket.on('newMsg', (message) => {
+      this.messages.push(cryptMsg.decipherMessage(message));
     });
     if (this.currentGroup != '') {
       this.getGroupData();
@@ -85,7 +86,11 @@ export default {
 
       axios.get(routes.apiRoutes.getMessages(this.currentGroup))
         .then(response => {
-          this.messages = response.data.messages;
+          var messages = [];
+          for (var result of response.data.messages) {
+            messages.push(cryptMsg.decipherMessage(result));
+          }
+          this.messages = messages;
       });
     },
     addMsg: function (e) {
@@ -98,7 +103,7 @@ export default {
       }
 
       this.messages.push(newMsg);
-      socket.emit('message from client', newMsg);
+      socket.emit('message from client', cryptMsg.cipherMessage(newMsg));
       this.newMsg = '';
     },
     toggleChat: function() {

@@ -13,6 +13,7 @@ back-end/yarn-debug.log*
 back-end/yarn-error.log*
 
 data
+.vscode
 
 # Editor directories and files
 .idea

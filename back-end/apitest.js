@@ -6,8 +6,6 @@ const mongoose    = require('mongoose');
 const userApi     = require('./api/user');
 const groupApi    = require('./api/group');
 
-const crypto      = require('crypto');
-
 logger('Test script for API functions');
 
 // DB connection
@@ -91,10 +89,3 @@ var res = new DummyResponse();
 //   }
 // }
 // groupApi.getGroup(req, res);
-
-
-const secret = 'abcdefg';
-const hash = crypto.createHmac('sha256', secret)
-                   .update('I love cupcakes')
-                   .digest('hex');
-console.log(hash);

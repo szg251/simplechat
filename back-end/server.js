@@ -6,6 +6,7 @@ const mongoose      = require('mongoose');
 const socketio      = require('socket.io');
 const cors          = require('cors');
 const cookieParser  = require('cookie-parser');
+const multer        = require('multer');
 
 // API functions
 const filters       = require('./api/filters');
@@ -15,11 +16,24 @@ const groupApi      = require('./api/group');
 logger('Vueapp back-end server booting...');
 
 const app           = express();
+const storage       = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, 'static/uploads/');
+  },
+  filename: function(req, file, cb) {
+    const dotIndex = file.originalname.lastIndexOf('.');
+    const fileExt = file.originalname.substring(dotIndex + 1, file.originalname.length);
+    cb(null, 'user_' + Date.now() + '.' + fileExt);
+  }
+})
+const upload        = multer({storage: storage});
+
 
 app.use(cors({credentials: true, origin: 'http://localhost:3333'}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(express.static('static'));
 
 // DB connection
 mongoose.connect('mongodb://localhost/vueapp', { useMongoClient: true });
@@ -45,6 +59,7 @@ app.all('/group/:group*', filters.groupFilter);
 // User API
 app.post('/login', userApi.login);
 app.post('/signup', userApi.signUp);
+app.put('/user/:userId/userimg', upload.single('userImg'), userApi.uploadUserImg);
 app.get('/user', userApi.getUser);
 app.get('/user/:userId/friends', userApi.getFriends);
 app.get('/user/:userId/friend/:friendId', userApi.getFriend);

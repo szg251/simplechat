@@ -1,6 +1,7 @@
 // Dependencies
 const logger      = require('../logger');
 const sessions    = require('../session');
+const crypto      = require('crypto');
 
 // Procedures
 const groupProc   = require('../procedures/group');
@@ -10,6 +11,8 @@ const Group       = require('../models/group');
 const Message     = require('../models/message');
 const User     = require('../models/user');
 
+const cipherKey = 'temporary';
+
 
 exports.newMessage = function(req, res) {
   groupProc.newMessage(req.body.message);
@@ -17,19 +20,20 @@ exports.newMessage = function(req, res) {
 
 exports.getMessages = function(req, res) {
   logger('Get messages request by ' + sessions.getUserId(req.cookies));
-  Message.find({group: req.params.group}, function(err, result) {
+  Message.find({group: req.params.group}, function(err, messages) {
     if (err) {
       logger('Database error: ' + err);
       res.status(500).json({success: false});
       return;
     }
-    res.json({success: true, messages: result});
+
+    res.json({success: true, messages: messages});
   });
 };
 
 exports.getGroup = function(req, res) {
   logger('Get group request by ' + sessions.getUserId(req.cookies));
-  
+
   Group.findOne({_id: req.params.group}, function(err, result) {
     if (err) {
       logger('Database error: ' + err);

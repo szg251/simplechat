@@ -6,12 +6,13 @@ const crypto      = require('crypto');
 // Models
 const User        = require('../models/user');
 const FriendReq   = require('../models/friendreq')
-const Group        = require('../models/group');
+const Group       = require('../models/group');
+
 
 function processPass(pass) {
   const secret = 'abcdefg';
   return crypto.createHmac('sha256', secret)
-                   .update('I love cupcakes')
+                   .update(pass)
                    .digest('hex');
 }
 
@@ -67,10 +68,13 @@ exports.getFriend =　function(req, res) {
       if (err) {
         logger('Database error: ' + err);
         res.status(500).json({success: false, reason: 'Database error.'});
+        return;
       }
 
       if (user.length === 0) {
+        logger('Friend not found');
         res.status(400).json({success: false, reason: 'Friend not found.'});
+        return;
       }
 
       res.json({success: true, friend: user[0]});
@@ -185,6 +189,29 @@ exports.signUp = function(req, res) {
       logger('Sign up successful.');
     });
   })
+}
+
+exports.uploadUserImg = function(req, res) {
+  logger('Upload user image requested');
+
+  User.findOne({_id: req.params.userId}).exec((err, user) => {
+    if (err) {
+      logger('Database error: ' + err);
+      res.status(500).json({success: false, reason: 'Database error.'});
+    }
+
+    console.log(req.file);
+    var filePath = 'http://localhost:3001/uploads/' + req.file.filename;
+    user.imageSrc = filePath;
+    user.save((err) => {
+      if (err) {
+        logger('Database error: ' + err);
+        res.status(500).json({success: false, reason: 'Database error.'});
+      }
+
+      res.status(200).json({success: true, path: filePath});
+    });
+  });
 }
 
 /**
