@@ -1,0 +1,67 @@
+<template>
+  <div class="well">
+    <form>
+      <div class="form-group">
+        <label for="fullname">Fullname:</label>
+        <input class="form-control" name="fullname" type="text" v-model="userData.fullname">
+      </div>
+      <div class="form-group">
+        <div class="thumbnail">
+          <img :src="userData.imageSrc" alt="">
+        </div>
+        <label class="btn btn-default">Change
+          <input type="file" name="userImg" class="hidden" accept="image/x-png,image/gif,image/jpeg" @change="uploadImg">
+        </label>
+      </div>
+      <div class="form-group">
+        <label for="introduction">Introduction:</label>
+        <input class="form-control" type="text" name="introduction" v-model="userData.introduction">
+      </div>
+      <div class="form-group">
+        <input type="submit" class="btn btn-primary" name="submit" value="Submit" @click="submitEdit">
+        <a class="btn btn-default" @click="cancelEdit">Cancel</a>
+      </div>
+    </form>
+  </div>
+</template>
+
+<script>
+import axios from 'axios'
+import routes from '../../../../config/routes'
+import bus from './eventbus'
+
+export default {
+  name: 'profile-edit',
+  data() {
+    return {
+    }
+  },
+  props: ['userData'],
+  methods: {
+    uploadImg: function(e) {
+      var formData = new FormData();
+      formData.append('userimg', e.target.files[0]);
+      axios.put(routes.apiRoutes.uploadImg(this.$props.userData.userId), formData, {
+          headers: {'Content-Type': 'multipart/form-data'}
+      }).then(response => {
+        this.$props.userData.imageSrc;
+      })
+    },
+    submitEdit: function(e) {
+      e.preventDefault();
+      axios.post(routes.apiRoutes.changeUser(this.$props.userData.userId), {
+        fullname: this.$props.userData.fullname,
+        introduction: this.$props.userData.introduction,
+        imageSrc: this.$props.userData.imageSrc
+      }).then(response => {
+        if (response.data.success) {
+          bus.$emit('toggleEditMode');
+        }
+      })
+    },
+    cancelEdit: function() {
+      bus.$emit('toggleEditMode');
+    }
+  }
+}
+</script>

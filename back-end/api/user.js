@@ -5,6 +5,7 @@ const crypto      = require('crypto');
 
 // Models
 const User        = require('../models/user');
+const Upload        = require('../models/upload');
 const FriendReq   = require('../models/friendreq')
 const Group       = require('../models/group');
 
@@ -68,6 +69,47 @@ exports.getUser =　function(req, res) {
       imageSrc: user.imageSrc
     }
     res.json({success: true, user: userInfo});
+  })
+}
+
+exports.changeUserInfo =　function(req, res) {
+  logger('User info modification request.');
+
+  User.findOne({_id: req.params.userId}).exec((err, user) => {
+    if (err) {
+      logger('Database error: ' + err);
+      res.status(400).json({success: false});
+      return;
+    }
+
+    Upload.findOne({src: req.body.imageSrc})
+      .exec((err, image) => {
+        if (err) {
+          logger('Database error: ' + err);
+          res.status(500).json({success: false, reason: 'Database error.'});
+          return;
+        }
+
+        if (image == null) {
+          logger('Image source is not in the database.');
+          res.status(500).json({success: false, reason: 'Image upload failed.'});
+          return;
+        }
+
+        user.fullname = req.body.fullname;
+        user.imageSrc = req.body.imageSrc;
+        user.introduction = req.body.introduction;
+        user.save(err => {
+          if (err) {
+            logger('Database error: ' + err);
+            res.status(400).json({success: false});
+            return;
+          }
+          upload.temporary = false;
+          upload.save();
+          res.status(200).json({success: true});
+        })
+      })
   })
 }
 
@@ -215,25 +257,43 @@ exports.signUp = function(req, res) {
 exports.uploadUserImg = function(req, res) {
   logger('Upload user image requested');
 
-  User.findOne({_id: req.params.userId}).exec((err, user) => {
+  var newUpload = new Upload({
+    src: 'http://localhost:3001/uploads/' + req.file.filename,
+    temporary: true,
+    owner: req.params.userId
+  });
+
+  newUpload.save((err) => {
     if (err) {
       logger('Database error: ' + err);
       res.status(500).json({success: false, reason: 'Database error.'});
     }
 
-    console.log(req.file);
-    var filePath = 'http://localhost:3001/uploads/' + req.file.filename;
-    user.imageSrc = filePath;
-    user.save((err) => {
-      if (err) {
-        logger('Database error: ' + err);
-        res.status(500).json({success: false, reason: 'Database error.'});
-      }
-
-      res.status(200).json({success: true, path: filePath});
-    });
+    res.status(200).json({success: true, path: newUpload.src});
   });
 }
+
+// exports.uploadUserImg = function(req, res) {
+//   logger('Upload user image requested');
+//
+//   User.findOne({_id: req.params.userId}).exec((err, user) => {
+//     if (err) {
+//       logger('Database error: ' + err);
+//       res.status(500).json({success: false, reason: 'Database error.'});
+//     }
+//
+//     var filePath = 'http://localhost:3001/uploads/' + req.file.filename;
+//     user.imageSrc = filePath;
+//     user.save((err) => {
+//       if (err) {
+//         logger('Database error: ' + err);
+//         res.status(500).json({success: false, reason: 'Database error.'});
+//       }
+//
+//       res.status(200).json({success: true, path: filePath});
+//     });
+//   });
+// }
 
 /**
  *  Get groups of a user

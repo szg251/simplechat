@@ -11,6 +11,8 @@ module.exports =　exports = {
 
     authenticateUser:   backEndServer + '/user',
     getUser:            userId  => {return backEndServer + '/user/' + userId},
+    changeUser:         userId  => {return backEndServer + '/user/' + userId},
+    uploadImg:          userId  => {return backEndServer + '/user/' + userId + '/userimg'},
     findUser:           backEndServer + '/finduser',
     getFriends:         userId  => {return backEndServer + '/user/' + userId + '/friends'},
     getFriend:          (userId, friendId)  => {return backEndServer + '/user/' + userId + '/friend/' + friendId},
