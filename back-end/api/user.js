@@ -31,10 +31,31 @@ exports.idExists = function(req, res) {
   })
 }
 
+exports.authenticateUser =　function(req, res) {
+  logger('User information request.');
+
+  var userId = sessions.getUserId(req.cookies);
+  if (userId == null) {
+      logger('User not logged in.');
+      res.status(200).json({success: false, reason: 'User not logged in.'});
+      return;
+  }
+
+  User.findOne({_id: userId}).exec((err, user) => {
+    if (err) {
+      logger('Database error: ' + err);
+      res.status(500).json({success: false, reason: 'Database error.'});
+      return;
+    }
+
+    res.json({success: true, userId: user._id});
+  })
+}
+
 exports.getUser =　function(req, res) {
   logger('User information request.');
 
-  User.findOne({_id: sessions.getUserId(req.cookies)}).exec((err, user) => {
+  User.findOne({_id: req.params.userId}).exec((err, user) => {
     if (err) {
       logger('Database error: ' + err);
       res.status(400).json({success: false});
@@ -46,7 +67,7 @@ exports.getUser =　function(req, res) {
       introduction: user.introduction,
       imageSrc: user.imageSrc
     }
-    res.json({success: true, userInfo: userInfo});
+    res.json({success: true, user: userInfo});
   })
 }
 

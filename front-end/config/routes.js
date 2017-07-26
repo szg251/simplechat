@@ -9,7 +9,8 @@ module.exports =　exports = {
     signup:             backEndServer + '/signup',
     logout:             userId  => {return backEndServer + '/user/' + userId + '/logout'},
 
-    getUser:            backEndServer + '/user',
+    authenticateUser:   backEndServer + '/user',
+    getUser:            userId  => {return backEndServer + '/user/' + userId},
     findUser:           backEndServer + '/finduser',
     getFriends:         userId  => {return backEndServer + '/user/' + userId + '/friends'},
     getFriend:          (userId, friendId)  => {return backEndServer + '/user/' + userId + '/friend/' + friendId},
@@ -24,7 +25,7 @@ module.exports =　exports = {
 
     createGroup:        backEndServer + '/group',
     getGroups:          userId  => {return backEndServer + '/user/' + userId + '/groups'},
-    getGroup:           group  => {return backEndServer + '/group/' + group},
+    getGroup:           group   => {return backEndServer + '/group/' + group},
     getMessages:        group   => {return backEndServer + '/group/' + group + '/messages'},
     userExists:         userId  => {return backEndServer + '/signup/' + userId}
   }

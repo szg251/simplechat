@@ -51,7 +51,7 @@ db.on('error', function(err) {
  **/
 
 //Filters
-app.all('/user*', filters.userFilter);
+// app.all('/user*', filters.userFilter);
 app.all('/group*', filters.userFilter);
 app.all('/user/:userId*', filters.userParamFilter);
 app.all('/group/:group*', filters.groupFilter);
@@ -60,7 +60,9 @@ app.all('/group/:group*', filters.groupFilter);
 app.post('/login', userApi.login);
 app.post('/signup', userApi.signUp);
 app.put('/user/:userId/userimg', upload.single('userImg'), userApi.uploadUserImg);
-app.get('/user', userApi.getUser);
+
+app.get('/user', userApi.authenticateUser);
+app.get('/user/:userId', userApi.getUser);
 app.get('/user/:userId/friends', userApi.getFriends);
 app.get('/user/:userId/friend/:friendId', userApi.getFriend);
 

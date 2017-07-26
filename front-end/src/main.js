@@ -7,6 +7,7 @@ import Chat from './components/Chat'
 import Groups from './components/Groups'
 import SignUp from './components/user/SignUp'
 import Login from './components/user/Login'
+import Profile from './components/user/Profile'
 import Friends from './components/user/Friends'
 import Friend from './components/user/Friend'
 import MainPage from './components/MainPage'
@@ -21,7 +22,8 @@ const routes = [
   {path: '/signup', component: SignUp},
   {path: '/login', component: Login},
   {path: '/user/friends', component: Friends},
-  {path: '/user/friend/:friendId', component: Friend, props: true}
+  {path: '/user/friend/:friendId', component: Friend, props: true},
+  {path: '/user/profile', component: Profile}
 ]
 
 const router = new VueRouter({

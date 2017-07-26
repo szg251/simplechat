@@ -37,24 +37,13 @@ export default {
       this.currentUser =　'';
       this.isLoggedin = false;
       this.$router.push('/');
-    }
-  },
-  created: function() {
-    if (document.cookie) {
-      axios.get(routes.apiRoutes.getUser)
+    },
+    authenticateUser: function() {
+      if (document.cookie) {
+      axios.get(routes.apiRoutes.authenticateUser)
         .then(response => {
-          this.currentUser = response.data.userInfo.userId;
-          this.isLoggedin = true;
-        });
-    }
-  },
-  watch: {
-    '$route': function() {
-      axios.get(routes.apiRoutes.getUser)
-        .then(response => {
-          
           if (response.data.success) {
-            this.currentUser = response.data.userInfo.userId;
+            this.currentUser = response.data.userId;
             this.isLoggedin = true;
           } else {
             // var cookies = document.cookie.split(';');
@@ -67,10 +56,19 @@ export default {
             //   }
 
             // }
-
-            this.$router.push('/');
+            
+            // this.$router.push('/');
           }
         });
+      }
+    }
+  },
+  created: function() {
+    this.authenticateUser();
+  },
+  watch: {
+    '$route': function() {
+      this.authenticateUser();
     }
   }
 }
