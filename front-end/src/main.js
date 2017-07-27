@@ -11,12 +11,12 @@ import Profile from './components/user/profile/Profile'
 import Friends from './components/user/Friends'
 import Friend from './components/user/Friend'
 import MainPage from './components/MainPage'
-import Vuex from 'vuex'
+// import Vuex from 'vuex'
 
 Vue.config.productionTip = false
 
 Vue.use(VueRouter)
-Vue.use(Vuex)
+// Vue.use(Vuex)
 
 const routes = [
   {path: '/', component: MainPage},

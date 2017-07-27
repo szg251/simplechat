@@ -12,6 +12,7 @@
         <label class="btn btn-default">Change
           <input type="file" name="userImg" class="hidden" accept="image/x-png,image/gif,image/jpeg" @change="uploadImg">
         </label>
+        <a @click="clearImg" class="btn btn-default">Clear</a>
       </div>
       <div class="form-group">
         <label for="introduction">Introduction:</label>
@@ -38,16 +39,21 @@ export default {
   },
   props: ['userData'],
   methods: {
-    uploadImg: function(e) {
+    uploadImg(e) {
       var formData = new FormData();
-      formData.append('userimg', e.target.files[0]);
+      formData.append('userImg', e.target.files[0]);
       axios.put(routes.apiRoutes.uploadImg(this.$props.userData.userId), formData, {
           headers: {'Content-Type': 'multipart/form-data'}
       }).then(response => {
-        this.$props.userData.imageSrc;
+        if (response.data.success) {
+          this.$props.userData.imageSrc = response.data.path
+        }
       })
     },
-    submitEdit: function(e) {
+    clearImg() {
+      this.$props.userData.imageSrc = '';
+    },
+    submitEdit(e) {
       e.preventDefault();
       axios.post(routes.apiRoutes.changeUser(this.$props.userData.userId), {
         fullname: this.$props.userData.fullname,
@@ -59,7 +65,7 @@ export default {
         }
       })
     },
-    cancelEdit: function() {
+    cancelEdit() {
       bus.$emit('toggleEditMode');
     }
   }

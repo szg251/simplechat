@@ -3,7 +3,6 @@ const Schema    = mongoose.Schema;
 const User      = require('./user');
 
 const uploadSchema = new Schema({
-  _id: String,
   src: {type: String, required: true},
   temporary: Boolean,
   owner: {type: String, ref: 'User'},

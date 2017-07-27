@@ -82,34 +82,51 @@ exports.changeUserInfo =　function(req, res) {
       return;
     }
 
-    Upload.findOne({src: req.body.imageSrc})
-      .exec((err, image) => {
-        if (err) {
-          logger('Database error: ' + err);
-          res.status(500).json({success: false, reason: 'Database error.'});
-          return;
-        }
+    if (user.imageSrc !== req.body.imageSrc) {
 
-        if (image == null) {
-          logger('Image source is not in the database.');
-          res.status(500).json({success: false, reason: 'Image upload failed.'});
-          return;
-        }
-
-        user.fullname = req.body.fullname;
-        user.imageSrc = req.body.imageSrc;
-        user.introduction = req.body.introduction;
-        user.save(err => {
+      // Changing the temporary state of the new image to false
+      if (req.body.imageSrc != '') {
+        Upload.findOne({src: req.body.imageSrc})
+        .exec((err, newImg) => {
           if (err) {
             logger('Database error: ' + err);
-            res.status(400).json({success: false});
+            res.status(500).json({success: false, reason: 'Database error.'});
             return;
           }
-          upload.temporary = false;
-          upload.save();
-          res.status(200).json({success: true});
+
+          if (newImg == null) {
+            logger('Image source is not in the database.');
+            res.status(500).json({success: false, reason: 'Image upload failed.'});
+            return;
+          }
+
+          newImg.temporary = false;
+          newImg.save();
         })
-      })
+      }
+      
+
+      // Changing the temporary state of the old image to true
+      if (user.imageSrc != '') {
+        Upload.findOne({src: user.imageSrc}).exec((err, oldImg) => {
+          oldImg.temporary = true;
+          oldImg.save();
+        })
+      }
+    }
+
+    user.fullname = req.body.fullname;
+    user.imageSrc = req.body.imageSrc;
+    user.introduction = req.body.introduction;
+    user.save(err => {
+      if (err) {
+        logger('Database error: ' + err);
+        res.status(400).json({success: false});
+        return;
+      }
+
+      res.status(200).json({success: true});
+    })
   })
 }
 
@@ -257,6 +274,12 @@ exports.signUp = function(req, res) {
 exports.uploadUserImg = function(req, res) {
   logger('Upload user image requested');
 
+  if (req.file == null) {
+      logger('Database error: ' + err);
+      res.status(400).json({success: false, reason: 'No file'});
+      return;
+  }
+
   var newUpload = new Upload({
     src: 'http://localhost:3001/uploads/' + req.file.filename,
     temporary: true,
@@ -267,6 +290,7 @@ exports.uploadUserImg = function(req, res) {
     if (err) {
       logger('Database error: ' + err);
       res.status(500).json({success: false, reason: 'Database error.'});
+      return;
     }
 
     res.status(200).json({success: true, path: newUpload.src});

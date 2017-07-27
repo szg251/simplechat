@@ -11,6 +11,7 @@ back-end/dist/
 back-end/npm-debug.log*
 back-end/yarn-debug.log*
 back-end/yarn-error.log*
+back-end/static
 
 data
 .vscode

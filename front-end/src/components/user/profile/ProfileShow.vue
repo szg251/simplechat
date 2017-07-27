@@ -1,6 +1,8 @@
 <template>
   <div>
-    <img :src="userData.imageSrc" alt="">
+    <div class="thumbnail">
+      <img :src="userData.imageSrc" alt="">
+    </div>
     <div><strong>UserId:</strong> {{userData.userId}}</div>
     <div><strong>Fullname:</strong> {{userData.fullname}}</div>
     <div><strong>Introduction:</strong> {{userData.introduction}}</div>
