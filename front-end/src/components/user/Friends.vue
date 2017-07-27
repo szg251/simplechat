@@ -2,8 +2,9 @@
   <div class="container">
     <h2>Friends</h2>
     <ul>
-      <li v-for="(friend, i) in friends" :key="'friend' +　i">
-        <router-link :to="'/user/friend/' + friend">{{friend}}</router-link>
+      <li v-for="(friend, i) in friends" :key="'friend' +　i" class="friend-list">
+        <img :src="friend.imageSrc" class="profile-img"><br/>
+        <router-link :to="'/user/friend/' + friend">{{friend._id}}</router-link>
       </li>
     </ul>
     <h2>Friend requests</h2>
@@ -123,5 +124,23 @@ export default {
 }
 </script>
 
-<style lang="css">
+<style lang="scss">
+  .friend-list {
+    list-style: none;
+    width: 110px;
+    text-align: center;
+
+    img {
+      height: 100px;
+      width: 100px;
+      border-radius: 10%;
+      margin-bottom: 10px;
+    }
+
+    a {
+      font-size: 16px;
+      font-style: oblique;
+      color: black;
+    }
+  }
 </style>

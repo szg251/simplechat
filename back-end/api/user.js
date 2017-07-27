@@ -82,7 +82,7 @@ exports.changeUserInfo =　function(req, res) {
       return;
     }
 
-    if (user.imageSrc !== req.body.imageSrc) {
+    if (user.imageSrc != req.body.imageSrc) {
 
       // Changing the temporary state of the new image to false
       if (req.body.imageSrc != '') {
@@ -104,7 +104,7 @@ exports.changeUserInfo =　function(req, res) {
           newImg.save();
         })
       }
-      
+
 
       // Changing the temporary state of the old image to true
       if (user.imageSrc != '') {
@@ -297,28 +297,6 @@ exports.uploadUserImg = function(req, res) {
   });
 }
 
-// exports.uploadUserImg = function(req, res) {
-//   logger('Upload user image requested');
-//
-//   User.findOne({_id: req.params.userId}).exec((err, user) => {
-//     if (err) {
-//       logger('Database error: ' + err);
-//       res.status(500).json({success: false, reason: 'Database error.'});
-//     }
-//
-//     var filePath = 'http://localhost:3001/uploads/' + req.file.filename;
-//     user.imageSrc = filePath;
-//     user.save((err) => {
-//       if (err) {
-//         logger('Database error: ' + err);
-//         res.status(500).json({success: false, reason: 'Database error.'});
-//       }
-//
-//       res.status(200).json({success: true, path: filePath});
-//     });
-//   });
-// }
-
 /**
  *  Get groups of a user
  */
@@ -349,6 +327,25 @@ exports.findUser = function(req, res) {
 }
 
 exports.getFriends = function(req, res) {
+  logger('Get friends request by ' + sessions.getUserId(req.cookies));
+
+  User.aggregate([
+    {$match: {'friends._userId': req.params.userId}},
+    {$project: {_id: 1, fullname: 1, imageSrc: 1}}
+  ]).exec((err, friends) => {
+
+      if (err) {
+        logger('Database error: ' +　err);
+        res.status(500).json({success: false});
+        return;
+      }
+
+      res.status(200).json({success: true, friends: friends});
+    })
+}
+
+
+exports.findFriends = function(req, res) {
   logger('Get friends request by ' + sessions.getUserId(req.cookies));
 
   User.aggregate([

@@ -1,13 +1,14 @@
 <template>
-  <div>
-    <h3>{{fullname}}</h3>
-    <img :src="imageSrc" alt="">
-    <div><strong>UserId:</strong> {{userId}}</div>
+  <div class="col-md-offset-4 col-md-4">
+    <h2>{{userId}}</h2>
+    <div class="thumbnail">
+      <img :src="imageSrc">
+    </div>
     <div><strong>Fullname:</strong> {{fullname}}</div>
     <div><strong>Introduction:</strong> {{introduction}}</div>
     <div>
       <a class="btn btn-default" v-if="!isFriendRequestSent" @click="sendReq">Send friend request</a>
-      <a class="btn btn-default" v-else @click="cancelReq">Cancel friend request</a> 
+      <a class="btn btn-default" v-else @click="cancelReq">Cancel friend request</a>
     </div>
   </div>
 </template>
@@ -50,7 +51,7 @@ export default {
             this.isFriendRequestSent = true;
           }
         });
-      
+
     },
     cancelReq: function () {
       axios.delete(routes.apiRoutes.cancelFriendRequest(this.currentUser), {data: {friendId: this.friendId}})

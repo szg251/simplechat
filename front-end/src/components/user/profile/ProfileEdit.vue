@@ -1,11 +1,8 @@
 <template>
-  <div class="well">
+  <div>
     <form>
       <div class="form-group">
-        <label for="fullname">Fullname:</label>
-        <input class="form-control" name="fullname" type="text" v-model="userData.fullname">
-      </div>
-      <div class="form-group">
+        <h2>{{userData.userId}}</h2>
         <div class="thumbnail">
           <img :src="userData.imageSrc" alt="">
         </div>
@@ -15,8 +12,12 @@
         <a @click="clearImg" class="btn btn-default">Clear</a>
       </div>
       <div class="form-group">
+        <label for="fullname">Fullname:</label>
+        <input class="form-control" name="fullname" type="text" v-model="userData.fullname">
+      </div>
+      <div class="form-group">
         <label for="introduction">Introduction:</label>
-        <input class="form-control" type="text" name="introduction" v-model="userData.introduction">
+        <textarea class="form-control" name="introduction" rows="3" v-model="userData.introduction"></textarea>
       </div>
       <div class="form-group">
         <input type="submit" class="btn btn-primary" name="submit" value="Submit" @click="submitEdit">

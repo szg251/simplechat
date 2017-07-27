@@ -1,18 +1,22 @@
 <template>
   <div class="chat-panel">
     <div class="chat-panel-header">
-      <h4>{{groupName}}</h4>
-      <ul>
-        <li v-for="(member, i) in members" :key="'member' + i">
+      <div class="group-name">
+        <a @click="toggleMembers">{{groupName}}</a>
+      </div>
+      <ul class="member-list" v-if="isMembersVisible">
+        <li>Me</li>
+        <li v-for="(member, i) in members" v-if="member != currentUser" :key="'member' + i">
           <router-link :to="'/user/friend/' + member">{{member}}</router-link>
         </li>
       </ul>
     </div>
     <div class="chat-panel-body">
-      <div v-for="(message, i) in messages" :key="'message' + i"
+      <div class="message" v-for="(message, i) in messages" :key="'message' + i"
           :class="{msgFromOther: message.user != currentUser}"  >
-        <small>{{message.user}} - {{message.time}}</small>
-        <div>{{message.text}}</div>
+        <span class="timestamp">{{message.user}} - {{message.time}}</span>
+        <div class="message-body">{{message.text}}</div>
+        <br/>
       </div>
 
       <form>
@@ -46,6 +50,7 @@ export default {
       newMsg: '',
       messages: [],
       isChatVisible: true,
+      isMembersVisible: false,
       sessionId: '',
       securityToken: '',
       groupName: '',
@@ -54,11 +59,11 @@ export default {
   },
   props: ['currentGroup', 'currentUser'],
   watch: {
-    currentGroup: function() {
+    currentGroup() {
       this.getGroupData();
     }
   },
-  created: function() {
+  created() {
 
     socket = io.connect(routes.socketRoute, {
       query: {
@@ -77,7 +82,7 @@ export default {
     }
   },
   methods: {
-    getGroupData: function() {
+    getGroupData() {
       axios.get(routes.apiRoutes.getGroup(this.currentGroup))
         .then(response => {
           this.groupName = response.data.group.name,
@@ -93,7 +98,7 @@ export default {
           this.messages = messages;
       });
     },
-    addMsg: function (e) {
+    addMsg(e) {
       e.preventDefault();
       var newMsg = {
         user: this.currentUser,
@@ -106,15 +111,30 @@ export default {
       socket.emit('message from client', cryptMsg.cipherMessage(newMsg));
       this.newMsg = '';
     },
-    toggleChat: function() {
+    toggleChat() {
       this.isChatVisible = !this.isChatVisible;
+    },
+    toggleMembers() {
+      this.isMembersVisible = !this.isMembersVisible;
     }
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="scss">
+  $user-color: #000;
+  $friend-color: #00f;
+
+  .group-name {
+    text-align: center;
+    font-size: large;
+
+    a {
+      color: black;
+    }
+  }
+
   .chat-panel {
     background-color: LightGray;
     border-radius: 10px;
@@ -124,8 +144,31 @@ export default {
     overflow-y: scroll;
   }
 
+  .member-list {
+    list-style: none;
+  }
+
+  .message {
+    text-align: left;
+    color: $user-color;
+
+    .timestamp {
+      font-size: x-small;
+      color: lighten($user-color, 10%);
+    }
+
+    .message-body {
+
+    }
+  }
+
   .msgFromOther {
     text-align: right;
-    color: DarkBlue;
+    color: $friend-color;
+
+    .timestamp {
+      font-size: x-small;
+      color: lighten($friend-color, 10%);
+    }
   }
 </style>

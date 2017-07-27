@@ -4,13 +4,15 @@
       <div class="container">
         <div class="navbar-brand">{{title}}</div>
         <ul class="nav navbar-nav">
-          <li v-if="!isLoggedin"><router-link to="/login">Login</router-link></li>
-          <li v-if="!isLoggedin"><router-link to="/signup">Sign up</router-link></li>
           <li v-if="isLoggedin"><router-link to="/chat">Chat</router-link></li>
           <li v-if="isLoggedin"><router-link to="/user/friends">Friends</router-link></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li v-if="!isLoggedin"><router-link to="/login">Login</router-link></li>
+          <li v-if="!isLoggedin"><router-link to="/signup">Sign up</router-link></li>
+          <li v-if="isLoggedin"><router-link to="/user/profile">{{currentUser}}</router-link></li>
           <li v-if="isLoggedin"><a href="#" v-on:click="logout">Logout</a></li>
         </ul>
-      <div class="navbar-text">{{currentUser}}</div>
       </div>
     </div>
     <router-view :currentUser="currentUser"></router-view>
@@ -56,7 +58,7 @@ export default {
             //   }
 
             // }
-            
+
             // this.$router.push('/');
           }
         });

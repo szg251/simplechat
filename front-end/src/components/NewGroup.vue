@@ -47,7 +47,7 @@ export default {
   props: ['currentUser'],
   methods: {
     memberLookup: function(e) {
-      axios.get(routes.apiRoutes.getFriends(this.currentUser), {params: {friendId: e.target.value}})
+      axios.get(routes.apiRoutes.findFriends(this.currentUser), {params: {friendId: e.target.value}})
         .then(results => {
           this.friends = results.data.friends;
         })
@@ -66,7 +66,7 @@ export default {
         }
         this.errors.invalidMember = false;
         return;
-      } 
+      }
 
       axios.get(routes.apiRoutes.userExists(e.target.value))
         .then(results => {
@@ -85,8 +85,8 @@ export default {
       });
 
       // console.log(this.errors)
-      
-      
+
+
     },
     closeMemberInput: function(e) {
       if (this.members.length > 1) {

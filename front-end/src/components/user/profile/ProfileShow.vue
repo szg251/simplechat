@@ -1,11 +1,11 @@
 <template>
   <div>
+    <h2>{{userData.userId}}</h2>
     <div class="thumbnail">
       <img :src="userData.imageSrc" alt="">
     </div>
-    <div><strong>UserId:</strong> {{userData.userId}}</div>
-    <div><strong>Fullname:</strong> {{userData.fullname}}</div>
-    <div><strong>Introduction:</strong> {{userData.introduction}}</div>
+    <strong>{{userData.fullname}}</strong>
+    <div>{{userData.introduction}}</div>
     <a @click="toggleEditMode" class="btn btn-default">Edit</a>
   </div>
 </template>

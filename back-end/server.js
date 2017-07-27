@@ -64,8 +64,9 @@ app.put('/user/:userId/userimg', upload.single('userImg'), userApi.uploadUserImg
 app.get('/user', userApi.authenticateUser);
 app.get('/user/:userId', userApi.getUser);
 app.post('/user/:userId', userApi.changeUserInfo);
-app.get('/user/:userId/friends', userApi.getFriends);
+app.get('/user/:userId/friends', userApi.findFriends);
 app.get('/user/:userId/friend/:friendId', userApi.getFriend);
+app.get('/user/:userId/friends/all', userApi.getFriends);
 
 app.get('/user/:userId/friendreqs', userApi.getFriendRequests);
 app.get('/user/:userId/myfriendreqs', userApi.getMyFriendRequests);
