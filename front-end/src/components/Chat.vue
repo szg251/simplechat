@@ -125,6 +125,7 @@ export default {
 <style scoped lang="scss">
   $user-color: #000;
   $friend-color: #00f;
+  $chat-background: #abc;
 
   .group-name {
     text-align: center;
@@ -136,7 +137,7 @@ export default {
   }
 
   .chat-panel {
-    background-color: LightGray;
+    background-color: $chat-background;
     border-radius: 10px;
     padding: 10px;
   }
@@ -146,6 +147,8 @@ export default {
 
   .member-list {
     list-style: none;
+    background-color: lighten($chat-background, 10%);
+    border-radius: 10px;
   }
 
   .message {

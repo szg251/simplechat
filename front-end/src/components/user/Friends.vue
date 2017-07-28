@@ -1,12 +1,13 @@
 <template lang="html">
   <div class="container">
     <h2>Friends</h2>
-    <ul>
-      <li v-for="(friend, i) in friends" :key="'friend' +　i" class="friend-list">
-        <img :src="friend.imageSrc" class="profile-img"><br/>
-        <router-link :to="'/user/friend/' + friend">{{friend._id}}</router-link>
-      </li>
-    </ul>
+        <div v-for="(friend, i) in friends" :key="'friend' +　i" class="friend">
+          <router-link :to="'/user/friend/' + friend">
+            <img :src="friend.imageSrc ? friend.imageSrc : noAvatar" 
+              class="profile-img"><br/>
+              {{friend._id}}
+          </router-link>
+        </div>
     <h2>Friend requests</h2>
     <ul>
       <li v-for="(friend, i) in friendReqs" :id="'friendReq' + i" :key="'friendReq' +　i">{{friend}}
@@ -38,6 +39,7 @@ export default {
   name: 'friends',
   data() {
     return {
+      noAvatar: 'http://localhost:3333/static/noavatarn.png',
       newFriend: '',
       friends: [],
       friendReqs: [],
@@ -73,10 +75,14 @@ export default {
     approveReq: function(e) {
       var friendId = this.friendReqs[e.target.parentNode.id.substring(9,10)];
       axios.post(routes.apiRoutes.approveFriendRequest(this.currentUser), {friendId: friendId})
-        .then(result => {
-          if (result.data.success) {
+        .then(response => {
+          // Get user data on success
+          if (response.data.success) {
             this.friendReqs.splice(e.target.parentNode.id.substring(9,10), 1);
-            this.friends.push(friendId);
+            axios.get(routes.apiRoutes.getFriend(this.currentUser, friendId))
+              .then(response => {
+                this.friends.push(response.data.friend);
+              })
           }
       })
     },
@@ -125,22 +131,25 @@ export default {
 </script>
 
 <style lang="scss">
-  .friend-list {
-    list-style: none;
-    width: 110px;
-    text-align: center;
 
-    img {
-      height: 100px;
-      width: 100px;
-      border-radius: 10%;
-      margin-bottom: 10px;
-    }
+h2 {
+  clear: both;
+}
 
-    a {
-      font-size: 16px;
-      font-style: oblique;
-      color: black;
-    }
+.friend {
+  text-align: center;
+  font-size: 16px;
+  font-style: oblique;
+  color: black;
+  padding: 20px;
+  float: left;
+  
+  img {
+    height: 150px;
+    width: 150px;
+    border-radius: 20%;
+    margin-bottom: 20px;
   }
+}
+
 </style>

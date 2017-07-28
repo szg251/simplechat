@@ -16,7 +16,7 @@ module.exports =　exports = {
     findUser:           backEndServer + '/finduser',
     findFriends:        userId  => {return backEndServer + '/user/' + userId + '/friends'},
     getFriend:          (userId, friendId)  => {return backEndServer + '/user/' + userId + '/friend/' + friendId},
-    getFriends:          (userId, friendId)  => {return backEndServer + '/user/' + userId + '/friends/all'},
+    getFriends:          (userId)  => {return backEndServer + '/user/' + userId + '/friends/all'},
 
     getFriendRequests:    userId  => {return backEndServer + '/user/' + userId + '/friendreqs'},
     getMyFriendRequests:  userId  => {return backEndServer + '/user/' + userId + '/myfriendreqs'},
