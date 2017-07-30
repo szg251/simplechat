@@ -4,7 +4,7 @@
       <h1>Sign up</h1>
 
       <div class="form-group">
-        <div v-if="inputError.user" class="alert alert-danger">User ID invalid</div>
+        <div v-if="inputError.user" class="alert alert-danger">Invalid user ID</div>
         <input class="form-control" type="text"
               name="userId" placeholder="UserID"
               v-model="userId"
@@ -12,18 +12,26 @@
       </div>
 
       <div class="form-group">
-        <div v-if="inputError.password" class="alert alert-danger">Password invalid</div>
+        <div v-if="inputError.mail" class="alert alert-danger">Invalid e-mail address</div>
+        <input class="form-control" type="text"
+              name="mail" placeholder="E-mail address"
+              v-model="mail"
+              v-on:change="checkMail">
+      </div>
+
+      <div class="form-group">
+        <div v-if="inputError.pass" class="alert alert-danger">Invalid password</div>
         <input class="form-control" type="password"
-              name="password1" placeholder="Password"
-              v-model="password1"
-              v-on:change="checkPassword1">
+              name="pass1" placeholder="Password"
+              v-model="pass1"
+              v-on:change="checkPass1">
       </div>
 
       <div class="form-group">
         <input class="form-control" type="password"
-              name="password2" placeholder="Confirm password"
-              v-model="password2"
-              v-on:change="checkPassword2">
+              name="pass2" placeholder="Confirm password"
+              v-model="pass2"
+              v-on:change="checkPass2">
       </div>
 
       <div class="form-group">
@@ -43,51 +51,65 @@ export default {
   data () {
     return {
       userId: '',
-      password1: '',
-      password2: '',
+      pass1: '',
+      pass2: '',
+      mail: '',
       idExists: false,
+      mailExists: false,
       isPassInvalid: false,
       inputError: {
         user: false,
-        password: false
+        pass: false,
+        mail: false
       },
       isEntered: {
         user: false,
         pass1: false,
-        pass2: false
+        pass2: false,
+        mail: false
       }
     }
   },
   methods: {
-    checkUserId: function() {
-      this.isEntered.user =　true;
-      if (this.userId !== '') {
-        axios.get(routes.apiRoutes.userExists(this.userId))
-            .then(res => {
-              this.idExists = res.data.userIdExists;
-              this.inputError.user = (this.userId === '') || this.idExists;
-              })
-          } else {
-            this.inputError.user = (this.userId === '') || this.idExists;
-          }
+    checkUserId () {
+      this.isEntered.user = true;
+      this.inputError.user = !this.userId || this.idExists;
+
+      axios.post(routes.apiRoutes.userExists, {userId: this.userId})
+          .then(res => {
+            this.idExists = res.data.userExists;
+            this.inputError.user = !this.userId || this.idExists;
+      })
     },
-    checkPassword1: function() {
-      this.inputError.password = this.isEntered.pass2 && (this.password1 !== this.password2) || (this.password1 ===　'') ;
+    checkPass1 () {
+      this.inputError.pass = this.isEntered.pass2 && (this.pass1 !== this.pass2) || !this.pass1 ;
       this.isEntered.pass1 =　true;
     },
-    checkPassword2: function() {
-      this.inputError.password = this.isEntered.pass1 && (this.password1 !== this.password2) || (this.password1 === '');
+    checkPass2 () {
+      this.inputError.pass = this.isEntered.pass1 && (this.pass1 !== this.pass2) || !this.pass1;
       this.isEntered.pass2 =　true;
 
     },
-    submit: function(e) {
+    checkMail () {
+      this.isEntered.mail = true;
+      var mailPattern = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+      this.inputError.mail = !this.mail || !mailPattern.test(this.mail);
+
+      axios.post(routes.apiRoutes.userExists, {mail: this.mail})
+          .then(res => {
+            this.mailExists = res.data.userExists;
+            this.inputError.mail = !this.mail || this.mailExists;
+      })
+    },
+    submit (e) {
       e.preventDefault();
-      if (!this.inputError.user && !this.inputError.password
-        && this.isEntered.user && this.isEntered.pass1 && this.isEntered.pass2) {
+      if (!this.inputError.user && !this.inputError.pass && !this.inputError.mail
+        && this.isEntered.user && this.isEntered.pass1 && this.isEntered.pass2 && this.isEntered.mail) {
 
         axios.post(routes.apiRoutes.signup, {
           userId: this.userId,
-          password: this.password1
+          password: this.pass1,
+          mail: this.mail
         }).then(result => {
           this.$router.push('/chat');
         })

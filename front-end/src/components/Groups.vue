@@ -1,33 +1,21 @@
 <template>
-  <div class="container">
-    <!-- <div>
-      <transition name="slide">
-      <chat class="col-md-3" v-for="(group, i) in groups"
-          :key="group"
-          :currentGroup="group"
-          :currentUser="currentUser">
-      </chat>
-      </transition>
-      <transition>
-        <button class="chat-btn btn" v-on:click="toggleChat" :id="'toggleChat' + i">{{isChatVisible ? '<' : '>'}}</button>
-      </transition>
-    </div> -->
-    <div class="row">
-      <div class="btn-group">
-        <a class="btn btn-default" v-for="group in groups"
-            :key="group._id"
-            :id="'group_' + group._id"
+  <div>
+    <div class="navbar">
+      <ul class="nav navbar-nav">
+        <li v-for="group in groups"
+          :key="group._id">
+          <a :id="'group_' + group._id"
             @click="showGroup">{{group.name}}</a>
-        <a class="btn btn-default" @click="newGroup">+</a>
-      </div>
+        </li>
+        <li><a @click="newGroup">+</a></li>
+      </ul>
     </div>
-    <div class="row">
-      <chat class="col-md-3" v-if="currentGroup != ''"
-          :currentGroup="currentGroup"
-          :currentUser="currentUser">
-      </chat>
-      <new-group class="col-md-3" v-if="showNewGroup" :currentUser="currentUser"></new-group>
-    </div>
+    <chat class="col-md-3" v-if="currentGroup != ''"
+        :currentGroup="currentGroup"
+        :currentUser="currentUser">
+    </chat>
+    <new-group class="col-md-3" v-if="showNewGroup" :currentUser="currentUser"></new-group>
+    <friends class="col-md-9" :currentUser="currentUser"></friends>
   </div>
 </template>
 
@@ -37,6 +25,7 @@ import axios from 'axios'
 import routes from '../../config/routes'
 import Chat from './Chat'
 import NewGroup from './NewGroup'
+import Friends from './user/Friends'
 
 axios.defaults.withCredentials = true;
 
@@ -50,7 +39,7 @@ export default {
     }
   },
   components: {
-    Chat, NewGroup
+    Chat, NewGroup, Friends
   },
   props: ['currentUser'],
   created: function() {

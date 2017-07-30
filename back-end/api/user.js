@@ -18,18 +18,19 @@ function processPass(pass) {
 }
 
 /**
-  * Checking if userId already exists (mostly before signup)
+  * Checking if userId or e-mail already exists (mostly before signup)
   */
-exports.idExists = function(req, res) {
-  User.count({_id: req.params.userId}, function(err, result) {
-    if (err) {
-      res.status(500).json({success: false});
-      return;
-    }
-    var userIdExists = (result != 0);
+exports.userExists = function(req, res) {
+  User.count({$or: [{_id: req.body.userId}, {mail: req.body.mail}]})
+    .exec((err, result) => {
+      if (err) {
+        res.status(500).json({success: false});
+        return;
+      }
+      var userExists = result != 0;
 
-    res.status(200).json({success: true, userIdExists: userIdExists});
-  })
+      res.status(200).json({success: true, userExists: userExists});
+    })
 }
 
 exports.authenticateUser =　function(req, res) {
@@ -85,7 +86,7 @@ exports.changeUserInfo =　function(req, res) {
     if (user.imageSrc != req.body.imageSrc) {
 
       // Changing the temporary state of the new image to false
-      if (req.body.imageSrc != '') {
+      if (req.body.imageSrc) {
         Upload.findOne({src: req.body.imageSrc})
         .exec((err, newImg) => {
           if (err) {
@@ -107,7 +108,7 @@ exports.changeUserInfo =　function(req, res) {
 
 
       // Changing the temporary state of the old image to true
-      if (user.imageSrc != '') {
+      if (user.imageSrc) {
         Upload.findOne({src: user.imageSrc}).exec((err, oldImg) => {
           oldImg.temporary = true;
           oldImg.save();
@@ -136,13 +137,15 @@ exports.getFriend =　function(req, res) {
 // left join ($lookup) is not working in the current version of MongoDB (v2.6)
   User.aggregate(
     {$match: {_id: req.params.friendId}},
-    {$unwind: '$friends'},
-    {$match: {"friends._userId": req.params.userId}},
     {$project: {
       _id: 1,
-      fullname: "$fullname",
-      introduction: "$introduction",
-      imageSrc: "$imageSrc"
+      fullname: 1,
+      introduction: 1,
+      imageSrc: 1,
+      isFriend: {
+        $in: [req.params.userId, '$friends._userId']
+      }
+
     }} ).exec((err, user) => {
 
       if (err) {
@@ -184,17 +187,17 @@ exports.login = function(req, res) {
 
   // Otherwise, get from database
   User.findOne({
-    _id: req.body.userId,
+    $or: [{ _id: req.body.userId }, { mail: req.body.userId }],
     pass: processPass(req.body.password)
   }, function(err, result) {
 
     if (err == null && result !== null) {
-      sessionCard = sessions.createSession(req.body.userId);
+      sessionCard = sessions.createSession(result._id);
       res
         .cookie('sessionId', sessionCard.sessionId, {expire: sessionCard.expireTime})
         .cookie('securityToken', sessionCard.securityToken, {expire: sessionCard.expireTime})
         .status(200)
-        .json({success: true, authCard: sessionCard});
+        .json({success: true, userId: result._id, authCard: sessionCard});
       logger('Login successful.');
     } else {
       res.status(400).json({success: false});
@@ -227,8 +230,7 @@ exports.logout = function(req, res) {
 exports.signUp = function(req, res) {
   logger('Signup request by ' + req.body.userId);
 
-  if (req.body.userId === null || req.body.userId === ''
-      ||　req.body.password === null || req.body.password === '') {
+  if (!req.body.userId || !req.body.mail || !req.body.password) {
 
     res.status(400).json({success: false});
     logger('Sign up failed.');
@@ -249,7 +251,8 @@ exports.signUp = function(req, res) {
     }
     var newUser = new User({
       _id: req.body.userId,
-      pass: processPass(req.body.password)
+      pass: processPass(req.body.password),
+      mail: req.body.mail
     });
     newUser.save(function (err) {
 

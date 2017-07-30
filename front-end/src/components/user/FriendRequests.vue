@@ -1,15 +1,25 @@
 <template lang="html">
-  <div class="container">
-    <h2>Friends</h2>
-        <div v-for="(friend, i) in friends" :key="'friend' +　i" class="friend">
-          <router-link :to="'/user/friend/' + friend._id">
-            <img :src="friend.imageSrc ? friend.imageSrc : noAvatar"
-              class="profile-img"><br/>
-              {{friend.fullname ? friend.fullname : friend._id}}
-          </router-link>
-        </div>
+  <div>
+    <h2>Friend requests</h2>
+    <ul>
+      <li v-for="(friend, i) in friendReqs" :id="'friendReq' + i" :key="'friendReq' +　i">{{friend}}
+        <a class="btn btn-default" @click="approveReq">Approve</a>
+        <a class="btn btn-default" @click="declineReq">Reject</a>
+      </li>
+    </ul>
+    <h2>Pending requests</h2>
+    <ul>
+      <li v-for="(friend, i) in pendingReqs" :id="'pendingReq' + i" :key="'pendingReq' +　i">{{friend}}
+        <a class="btn btn-default" @click="cancelReq">Cancel</a>
+      </li>
+    </ul>
+    <form>
+      <div class="form-group">
+        <input class="form-control" type="text" v-model="newFriend">
+      </div>
+      <input type="submit" class="btn btn-primary" v-on:click="sendReq">
+    </form>
   </div>
-
 </template>
 
 <script>
@@ -17,12 +27,10 @@ import axios from 'axios'
 import routes from '../../../config/routes'
 
 export default {
-  name: 'friends',
+  name: 'friend-requests',
   data() {
     return {
-      noAvatar: 'http://localhost:3333/static/noavatarn.png',
       newFriend: '',
-      friends: [],
       friendReqs: [],
       pendingReqs: []
     }
@@ -86,11 +94,6 @@ export default {
         })
     },
     getUserData: function() {
-      axios.get(routes.apiRoutes.getFriends(this.currentUser))
-        .then(results => {
-          this.friends = results.data.friends;
-        });
-
       axios.get(routes.apiRoutes.getFriendRequests(this.currentUser))
         .then(results => {
           this.friendReqs = [];
@@ -111,26 +114,5 @@ export default {
 }
 </script>
 
-<style lang="scss">
-
-h2 {
-  clear: both;
-}
-
-.friend {
-  text-align: center;
-  font-size: 16px;
-  font-style: oblique;
-  color: black;
-  padding: 20px;
-  float: left;
-
-  img {
-    height: 150px;
-    width: 150px;
-    border-radius: 20%;
-    margin-bottom: 20px;
-  }
-}
-
+<style lang="css">
 </style>

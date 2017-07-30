@@ -6,6 +6,7 @@
         <ul class="nav navbar-nav">
           <li v-if="isLoggedin"><router-link to="/chat">Chat</router-link></li>
           <li v-if="isLoggedin"><router-link to="/user/friends">Friends</router-link></li>
+          <li v-if="isLoggedin"><router-link to="/user/friendrequests">Friend requests</router-link></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li v-if="!isLoggedin"><router-link to="/login">Login</router-link></li>
@@ -82,5 +83,6 @@ export default {
   .navbar {
     height: 10vh;
     margin-bottom: 0;
+    border-radius: 0;
   }
 </style>

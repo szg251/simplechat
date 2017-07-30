@@ -8,15 +8,18 @@
       <div class="alert alert-danger" v-if="errors.noMembers">You must input at least one member</div>
       <div class="alert alert-danger" v-if="errors.invalidMember">UserId doesn't exist</div>
       <div class="input-group" v-for="(member, i) in members" :key="'member' + i">
-        <input type="text" :id="'member' + i" list="userIds" class="form-control" placeholder="Member"
+        <input type="text" :id="'member' + i" list="userIds" class="form-control"
+            placeholder="Member" autocomplete="off"
             v-model="member.user"
-            v-on:keyup="memberLookup"
-            v-on:change="checkMember">
+            @keyup="memberLookup"
+            @change="checkMember">
             <datalist id="userIds">
               <option v-for="(friend, i) in friends" :value="friend" :key="'friend' +　i"/>
             </datalist>
             <span class="input-group-btn">
-              <a class="btn btn-default" v-on:click="closeMemberInput" :id="'close' + i"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+              <a class="btn btn-default" @click.capture="closeMemberInput" :id="'close' + i">
+                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+              </a>
             </span>
       </div>
     </div>
@@ -46,16 +49,22 @@ export default {
   },
   props: ['currentUser'],
   methods: {
-    memberLookup: function(e) {
+    memberLookup (e) {
       axios.get(routes.apiRoutes.findFriends(this.currentUser), {params: {friendId: e.target.value}})
         .then(results => {
-          this.friends = results.data.friends;
+          if (results.data.friends[0] === e.target.value) {
+            this.friends = [];
+          } else {
+            this.friends = results.data.friends;
+          }
         })
+
+      // Create a new member input field
       if (this.members[this.members.length-1].user !== ''){
         this.members.push({user: ''})
       }
     },
-    checkMember: function(e) {
+    checkMember (e) {
       if (e.target.value === '') {
         this.errors.invalidMembers[e.target.id.slice(6, e.target.id.length)] = false;
         for (var i = 0; i < this.errors.invalidMembers.length; i++) {
@@ -68,33 +77,34 @@ export default {
         return;
       }
 
-      axios.get(routes.apiRoutes.userExists(e.target.value))
+      axios.post(routes.apiRoutes.userExists, {userId: e.target.value})
         .then(results => {
-        if (!results.data.userIdExists) {
+        if (!results.data.userExists) {
           this.errors.invalidMembers[e.target.id.slice(6, e.target.id.length)] = true;
         } else {
           this.errors.invalidMembers[e.target.id.slice(6, e.target.id.length)] = false;
         }
-        for (var i = 0; i < this.errors.invalidMembers.length; i++) {
-          if (this.errors.invalidMembers[i]) {
-            this.errors.invalidMember = true;
-            return;
-          }
-        }
-        this.errors.invalidMember = false;
-      });
-
-      // console.log(this.errors)
-
-
+        this.countInvalidMembers();
+      })
     },
-    closeMemberInput: function(e) {
+    countInvalidMembers () {
+      for (var i = 0; i < this.errors.invalidMembers.length; i++) {
+        if (this.errors.invalidMembers[i]) {
+          this.errors.invalidMember = true;
+          return;
+        }
+      }
+      this.errors.invalidMember = false;
+    },
+    closeMemberInput (e) {
       if (this.members.length > 1) {
-        var memberId = e.toElement.id.slice(5, e.toElement.length);
+        var memberId = e.currentTarget.id.slice(5, e.currentTarget.length);
         this.members.splice(memberId, 1);
+        this.errors.invalidMembers.splice(memberId, 1);
+        this.countInvalidMembers();
       }
     },
-    submit: function(e) {
+    submit (e) {
       e.preventDefault();
       if (this.errors.invalidMember || this.errors.noMembers) {
         return;
@@ -114,7 +124,6 @@ export default {
         }
 
       }
-      console.log('length: ' +　members.length);
       if (members.length > 0) {
         axios.put(routes.apiRoutes.createGroup, {
           name: this.groupName,
@@ -127,6 +136,3 @@ export default {
   }
 }
 </script>
-
-<style lang="css">
-</style>

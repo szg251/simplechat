@@ -8,6 +8,7 @@ const friendSchema = new Schema({
 
 const userSchema = new Schema({
   _id: String,
+  mail: {type: String, unique: true},
   pass: String,
   fullname: String,
   introduction: String,

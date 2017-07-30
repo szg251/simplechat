@@ -7,6 +7,7 @@ module.exports =　exports = {
   apiRoutes: {
     login:              backEndServer + '/login',
     signup:             backEndServer + '/signup',
+    userExists:         backEndServer + '/userexists',
     logout:             userId  => {return backEndServer + '/user/' + userId + '/logout'},
 
     authenticateUser:   backEndServer + '/user',
@@ -29,7 +30,6 @@ module.exports =　exports = {
     createGroup:        backEndServer + '/group',
     getGroups:          userId  => {return backEndServer + '/user/' + userId + '/groups'},
     getGroup:           group   => {return backEndServer + '/group/' + group},
-    getMessages:        group   => {return backEndServer + '/group/' + group + '/messages'},
-    userExists:         userId  => {return backEndServer + '/signup/' + userId}
+    getMessages:        group   => {return backEndServer + '/group/' + group + '/messages'}
   }
 }

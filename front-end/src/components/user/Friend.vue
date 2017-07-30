@@ -6,7 +6,7 @@
     </div>
     <div><strong>Fullname:</strong> {{fullname}}</div>
     <div><strong>Introduction:</strong> {{introduction}}</div>
-    <div>
+    <div v-if="!isFriend">
       <a class="btn btn-default" v-if="!isFriendRequestSent" @click="sendReq">Send friend request</a>
       <a class="btn btn-default" v-else @click="cancelReq">Cancel friend request</a>
     </div>
@@ -25,7 +25,8 @@ export default {
         fullname: '',
         introduction: '',
         imageSrc: '',
-        isFriendRequestSent: false
+        isFriendRequestSent: false,
+        isFriend: false
       }
   },
   props: ['currentUser', 'friendId'],
@@ -41,7 +42,8 @@ export default {
           this.userId = result.data.friend._id,
           this.fullname = result.data.friend.fullname,
           this.introduction = result.data.friend.introduction,
-          this.imageSrc = result.data.friend.imageSrc
+          this.imageSrc = result.data.friend.imageSrc,
+          this.isFriend = result.data.friend.isFriend
         });
     },
     sendReq: function() {

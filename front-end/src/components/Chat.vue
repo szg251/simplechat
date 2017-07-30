@@ -139,10 +139,14 @@ export default {
   .chat-panel {
     background-color: $chat-background;
     border-radius: 10px;
+    margin-top: 10px;
     padding: 10px;
   }
   .chat-panel-body {
-    overflow-y: scroll;
+    height: 70vh;
+    text-overflow: clip;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .member-list {

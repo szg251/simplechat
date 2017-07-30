@@ -77,7 +77,7 @@ app.post('/user/:userId/approvefriendreq', userApi.approveFriendRequest);
 
 app.get('/user/:userId/logout', userApi.logout);
 app.get('/user/:userId/groups', userApi.getGroups);
-app.get('/signup/:userId', userApi.idExists); // not filtered
+app.post('/userexists', userApi.userExists);
 app.get('/finduser', userApi.findUser);
 
 // Group API
