@@ -42,7 +42,6 @@ export default {
       this.$router.push('/');
     },
     authenticateUser: function() {
-      if (document.cookie) {
       axios.get(routes.apiRoutes.authenticateUser)
         .then(response => {
           if (response.data.success) {
@@ -59,11 +58,15 @@ export default {
             //   }
 
             // }
+            if (this.$router.currentRoute.path != '/' 
+                && this.$router.currentRoute.path != '/login'
+                && this.$router.currentRoute.path != '/signup') {
 
-            // this.$router.push('/');
+              this.$router.push('/login');
+            }
           }
         });
-      }
+      
     }
   },
   created: function() {

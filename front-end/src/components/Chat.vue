@@ -1,35 +1,20 @@
 <template>
-  <div class="chat-panel">
-    <div class="chat-panel-header">
-      <div class="group-name">
-        <a @click="toggleMembers">{{groupName}}</a>
-      </div>
-      <ul class="member-list" v-if="isMembersVisible">
-        <li>Me</li>
-        <li v-for="(member, i) in members" v-if="member != currentUser" :key="'member' + i">
-          <router-link :to="'/user/friend/' + member">{{member}}</router-link>
+  <div>
+    <div class="navbar">
+      <ul class="nav navbar-nav">
+        <li v-for="group in groups"
+          :key="group._id">
+          <a :id="'group_' + group._id"
+            @click="showGroup">{{group.name}}</a>
         </li>
+        <li><a @click="newGroup">+</a></li>
       </ul>
     </div>
-    <div class="chat-panel-body">
-      <div class="message" v-for="(message, i) in messages" :key="'message' + i"
-          :class="{msgFromOther: message.user != currentUser}"  >
-        <span class="timestamp">{{message.user}} - {{message.time}}</span>
-        <div class="message-body">{{message.text}}</div>
-        <br/>
-      </div>
-
-      <form>
-        <div class="input-group">
-            <input class="form-control" type="text"
-              placeholder="Write some message..." v-model="newMsg">
-            <span class="input-group-btn">
-              <input class="btn btn-primary" type="submit"
-                value="Send" v-on:click="addMsg">
-            </span>
-        </div>
-      </form>
-    </div>
+    <chat-panel class="col-md-3 floating-panel" v-if="currentGroup != ''"
+        :currentGroup="currentGroup"
+        :currentUser="currentUser">
+    </chat-panel>
+    <new-group class="col-md-3 floating-panel" v-if="showNewGroup" :currentUser="currentUser"></new-group>
   </div>
 </template>
 
@@ -37,145 +22,75 @@
 
 import axios from 'axios'
 import routes from '../../config/routes'
-import io from 'socket.io-client'
-import cryptMsg from '../../security'
+import ChatPanel from './ChatPanel'
+import NewGroup from './NewGroup'
 
-var socket;
 axios.defaults.withCredentials = true;
 
 export default {
   name: 'chat',
-  data () {
+  data() {
     return {
-      newMsg: '',
-      messages: [],
-      isChatVisible: true,
-      isMembersVisible: false,
-      sessionId: '',
-      securityToken: '',
-      groupName: '',
-      members: []
+      groups: [],
+      currentGroup: '',
+      showNewGroup: false
     }
   },
-  props: ['currentGroup', 'currentUser'],
+  components: {
+    ChatPanel, NewGroup
+  },
+  props: ['currentUser'],
+  created: function() {
+    if (this.currentUser != '') {
+      this.getUserData();
+    }
+  },
   watch: {
-    currentGroup() {
-      this.getGroupData();
-    }
-  },
-  created() {
-
-    socket = io.connect(routes.socketRoute, {
-      query: {
-            sessionId: this.sessionId,
-            securityToken: this.securityToken
-          }
-    })
-
-    socket.emit('join group', this.currentGroup);
-
-    socket.on('newMsg', (message) => {
-      this.messages.push(cryptMsg.decipherMessage(message));
-    });
-    if (this.currentGroup != '') {
-      this.getGroupData();
+    currentUser: function() {
+      this.getUserData();
     }
   },
   methods: {
-    getGroupData() {
-      axios.get(routes.apiRoutes.getGroup(this.currentGroup))
-        .then(response => {
-          this.groupName = response.data.group.name,
-          this.members = response.data.group.members
-      });
+    getUserData: function() {
+        axios.get(routes.apiRoutes.getGroups(this.currentUser))
+          .then(results => {
+            this.groups = [];
+            for(var result of results.data.groups) {
+              axios.get(routes.apiRoutes.getGroup(result._id))
+                .then(response => {
+                  this.groups.push(response.data.group);
+              });
 
-      axios.get(routes.apiRoutes.getMessages(this.currentGroup))
-        .then(response => {
-          var messages = [];
-          for (var result of response.data.messages) {
-            messages.push(cryptMsg.decipherMessage(result));
-          }
-          this.messages = messages;
-      });
+            }
+          })
+
     },
-    addMsg(e) {
-      e.preventDefault();
-      var newMsg = {
-        user: this.currentUser,
-        group: this.currentGroup,
-        text: this.newMsg,
-        time: new Date()
+    showGroup: function(e) {
+      var groupId = e.target.id.slice(6, e.target.id.length);
+
+      this.showNewGroup = false;
+      if (this.currentGroup != groupId) {
+        this.currentGroup = groupId;
+      } else {
+        this.currentGroup = '';
       }
-
-      this.messages.push(newMsg);
-      socket.emit('message from client', cryptMsg.cipherMessage(newMsg));
-      this.newMsg = '';
     },
-    toggleChat() {
-      this.isChatVisible = !this.isChatVisible;
-    },
-    toggleMembers() {
-      this.isMembersVisible = !this.isMembersVisible;
+    newGroup: function() {
+      this.currentGroup = '';
+      this.showNewGroup = !this.showNewGroup;
     }
   }
+
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-  $user-color: #000;
-  $friend-color: #00f;
   $chat-background: #abc;
 
-  .group-name {
-    text-align: center;
-    font-size: large;
-
-    a {
-      color: black;
-    }
-  }
-
-  .chat-panel {
+  .floating-panel {
+    position: absolute;
+    z-index: 1;
     background-color: $chat-background;
     border-radius: 10px;
-    margin-top: 10px;
-    padding: 10px;
-  }
-  .chat-panel-body {
-    height: 70vh;
-    text-overflow: clip;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-
-  .member-list {
-    list-style: none;
-    background-color: lighten($chat-background, 10%);
-    border-radius: 10px;
-  }
-
-  .message {
-    text-align: left;
-    color: $user-color;
-
-    .timestamp {
-      font-size: x-small;
-      color: lighten($user-color, 10%);
-    }
-
-    .message-body {
-
-    }
-  }
-
-  .msgFromOther {
-    text-align: right;
-    color: $friend-color;
-
-    .timestamp {
-      font-size: x-small;
-      color: lighten($friend-color, 10%);
-    }
   }
 </style>

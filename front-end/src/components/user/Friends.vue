@@ -1,13 +1,16 @@
 <template lang="html">
-  <div class="container">
-    <h2>Friends</h2>
-        <div v-for="(friend, i) in friends" :key="'friend' +　i" class="friend">
-          <router-link :to="'/user/friend/' + friend._id">
-            <img :src="friend.imageSrc ? friend.imageSrc : noAvatar"
-              class="profile-img"><br/>
-              {{friend.fullname ? friend.fullname : friend._id}}
-          </router-link>
-        </div>
+  <div>
+    <chat :currentUser="currentUser"></chat>
+    <div class="container">
+      <h2>Friends</h2>
+          <div v-for="(friend, i) in friends" :key="'friend' +　i" class="friend">
+            <router-link :to="'/user/friend/' + friend._id">
+              <img :src="friend.imageSrc ? friend.imageSrc : noAvatar"
+                class="profile-img"><br/>
+                {{friend.fullname ? friend.fullname : friend._id}}
+            </router-link>
+          </div>
+    </div>
   </div>
 
 </template>
@@ -15,6 +18,7 @@
 <script>
 import axios from 'axios'
 import routes from '../../../config/routes'
+import Chat from '../Chat'
 
 export default {
   name: 'friends',
@@ -37,6 +41,9 @@ export default {
     currentUser: function() {
       this.getUserData();
     }
+  },
+  components: {
+    Chat
   },
   methods: {
     sendReq: function(e) {
