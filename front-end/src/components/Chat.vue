@@ -10,11 +10,11 @@
         <li><a @click="newGroup">+</a></li>
       </ul>
     </div>
-    <chat-panel class="col-md-3 floating-panel" v-if="currentGroup != ''"
+    <chat-panel class="floating-panel" v-if="currentGroup != ''"
         :currentGroup="currentGroup"
         :currentUser="currentUser">
     </chat-panel>
-    <new-group class="col-md-3 floating-panel" v-if="showNewGroup" :currentUser="currentUser"></new-group>
+    <new-group class="floating-panel" v-if="showNewGroup" :currentUser="currentUser"></new-group>
   </div>
 </template>
 
@@ -40,18 +40,21 @@ export default {
     ChatPanel, NewGroup
   },
   props: ['currentUser'],
-  created: function() {
+  created () {
     if (this.currentUser != '') {
       this.getUserData();
     }
   },
   watch: {
-    currentUser: function() {
+    currentUser () {
       this.getUserData();
+    },
+    '$route': function () {
+      this.hideAll();
     }
   },
   methods: {
-    getUserData: function() {
+    getUserData () {
         axios.get(routes.apiRoutes.getGroups(this.currentUser))
           .then(results => {
             this.groups = [];
@@ -65,7 +68,7 @@ export default {
           })
 
     },
-    showGroup: function(e) {
+    showGroup (e) {
       var groupId = e.target.id.slice(6, e.target.id.length);
 
       this.showNewGroup = false;
@@ -75,7 +78,7 @@ export default {
         this.currentGroup = '';
       }
     },
-    newGroup: function() {
+    newGroup () {
       this.currentGroup = '';
       this.showNewGroup = !this.showNewGroup;
     }
@@ -84,13 +87,79 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
-  $chat-background: #abc;
+<style lang="scss">
+
+  $user-color: #000;
+  $friend-color: #00f;
+  $chat-header-background: #abc;
+  $chat-header-color: darken($chat-header-background, 60%);
+  $chat-background: #fff;
 
   .floating-panel {
+    height: 300px;
+    width: 220px;
     position: absolute;
     z-index: 1;
     background-color: $chat-background;
-    border-radius: 10px;
+    border-radius: 2px;
+    box-shadow: 0 0 10px;
+
+    .floating-panel-header {
+      padding: 10px;
+      font-weight: bold;
+      text-align: center;
+      background-color: $chat-header-background;
+      a {
+        color: $chat-header-color;
+      }
+
+      .member-list {
+        list-style: none;
+        min-width: 200px;
+        background-color: $chat-background;
+        border-radius: 5px;
+        position: absolute;
+        padding: 5px;
+        z-index: 2;
+        text-align: left;
+        box-shadow: 0 0 10px;
+      }
+    }
+
+    .floating-panel-body {
+      position: absolute;
+      padding: 10px;
+      height: 210px;
+      width: 100%;
+      text-overflow: clip;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .floating-panel-footer {
+      position: absolute;
+      bottom: 0px;
+      padding: 10px;
+    }
+  }
+
+  .message {
+    text-align: left;
+    color: $user-color;
+
+    .timestamp {
+      font-size: x-small;
+      color: lighten($user-color, 10%);
+    }
+  }
+
+  .msgFromOther {
+    text-align: right;
+    color: $friend-color;
+
+    .timestamp {
+      font-size: x-small;
+      color: lighten($friend-color, 10%);
+    }
   }
 </style>

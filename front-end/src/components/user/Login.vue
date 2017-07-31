@@ -38,7 +38,7 @@ export default {
           password: this.password
       }).then(result => {
         if (result.data.success)
-          this.$router.push('/chat');
+          this.$router.push('/friends');
       });
     }
   }

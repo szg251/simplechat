@@ -2,9 +2,8 @@
   <div>
     <div class="nav navbar navbar-inverse">
       <div class="container">
-        <div class="navbar-brand">{{title}}</div>
+        <router-link to="/"><div class="navbar-brand">{{title}}</div></router-link>
         <ul class="nav navbar-nav">
-          <li v-if="isLoggedin"><router-link to="/chat">Chat</router-link></li>
           <li v-if="isLoggedin"><router-link to="/user/friends">Friends</router-link></li>
           <li v-if="isLoggedin"><router-link to="/user/friendrequests">Friend requests</router-link></li>
         </ul>
@@ -16,13 +15,15 @@
         </ul>
       </div>
     </div>
+    <chat v-if="isLoggedin" :currentUser="currentUser"></chat>
     <router-view :currentUser="currentUser"></router-view>
   </div>
 </template>
 
 <script>
-var axios   = require('axios')
-var routes  = require('../config/routes')
+import axios from 'axios';
+import routes from '../config/routes'
+import Chat from './components/Chat'
 axios.defaults.withCredentials = true;
 
 export default {
@@ -58,15 +59,16 @@ export default {
             //   }
 
             // }
-            if (this.$router.currentRoute.path != '/' 
+            if (this.$router.currentRoute.path != '/'
                 && this.$router.currentRoute.path != '/login'
                 && this.$router.currentRoute.path != '/signup') {
 
+              this.isLoggedin = false;
               this.$router.push('/login');
             }
           }
         });
-      
+
     }
   },
   created: function() {
@@ -76,6 +78,9 @@ export default {
     '$route': function() {
       this.authenticateUser();
     }
+  },
+  components: {
+    Chat
   }
 }
 </script>

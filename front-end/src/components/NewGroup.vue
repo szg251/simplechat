@@ -1,32 +1,35 @@
 <template>
-  <form>
-    <h2>New Group</h2>
-    <div class="form-group">
-      <input type="text" class="form-control" placeholder="Group name" v-model="groupName">
-    </div>
-    <div class="form-group">
-      <div class="alert alert-danger" v-if="errors.noMembers">You must input at least one member</div>
-      <div class="alert alert-danger" v-if="errors.invalidMember">UserId doesn't exist</div>
-      <div class="input-group" v-for="(member, i) in members" :key="'member' + i">
-        <input type="text" :id="'member' + i" list="userIds" class="form-control"
-            placeholder="Member" autocomplete="off"
-            v-model="member.user"
-            @keyup="memberLookup"
-            @change="checkMember">
-            <datalist id="userIds">
-              <option v-for="(friend, i) in friends" :value="friend" :key="'friend' +　i"/>
-            </datalist>
-            <span class="input-group-btn">
-              <a class="btn btn-default" @click.capture="closeMemberInput" :id="'close' + i">
-                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-              </a>
-            </span>
+  <div class="floating-panel">
+    <form>
+      <div class="floating-panel-header">
+        <input type="text" class="form-control" placeholder="New group" v-model="groupName">
       </div>
-    </div>
-    <div class="form-group">
-      <input type="submit" class="btn btn-primary" v-on:click="submit">
-    </div>
-  </form>
+        <div class="floating-panel-body">
+          <div class="form-group">
+            <div class="alert alert-danger" v-if="errors.noMembers">You must input at least one member</div>
+            <div class="alert alert-danger" v-if="errors.invalidMember">UserId doesn't exist</div>
+            <div class="input-group" v-for="(member, i) in members" :key="'member' + i">
+              <input type="text" :id="'member' + i" list="userIds" class="form-control"
+                  placeholder="Member" autocomplete="off"
+                  v-model="member.user"
+                  @keyup="memberLookup"
+                  @change="checkMember">
+              <datalist id="userIds">
+                <option v-for="(friend, i) in friends" :value="friend" :key="'friend' +　i"/>
+              </datalist>
+              <span class="input-group-btn">
+                <a class="btn btn-default" @click.capture="closeMemberInput" :id="'close' + i">
+                  <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="floating-panel-footer">
+            <input type="submit" class="btn btn-primary" v-on:click="submit">
+        </div>
+      </form>
+  </div>
 </template>
 
 <script>

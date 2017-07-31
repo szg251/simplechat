@@ -1,6 +1,5 @@
 <template lang="html">
   <div>
-    <chat :currentUser="currentUser"></chat>
     <div class="container">
       <h2>Friends</h2>
           <div v-for="(friend, i) in friends" :key="'friend' +　i" class="friend">
@@ -18,7 +17,6 @@
 <script>
 import axios from 'axios'
 import routes from '../../../config/routes'
-import Chat from '../Chat'
 
 export default {
   name: 'friends',
@@ -41,9 +39,6 @@ export default {
     currentUser: function() {
       this.getUserData();
     }
-  },
-  components: {
-    Chat
   },
   methods: {
     sendReq: function(e) {

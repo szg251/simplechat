@@ -1,9 +1,7 @@
 <template>
   <div class="chat-panel">
-    <div class="chat-panel-header">
-      <div class="group-name">
-        <a @click="toggleMembers">{{groupName}}</a>
-      </div>
+    <div class="floating-panel-header">
+      <a @click="toggleMembers">{{groupName}}</a>
       <ul class="member-list" v-if="isMembersVisible">
         <li>Me</li>
         <li v-for="(member, i) in members" v-if="member != currentUser" :key="'member' + i">
@@ -11,14 +9,15 @@
         </li>
       </ul>
     </div>
-    <div class="chat-panel-body">
+    <div class="floating-panel-body">
       <div class="message" v-for="(message, i) in messages" :key="'message' + i"
           :class="{msgFromOther: message.user != currentUser}"  >
         <span class="timestamp">{{message.user}} - {{message.time}}</span>
         <div class="message-body">{{message.text}}</div>
         <br/>
       </div>
-
+    </div>
+    <div class="floating-panel-footer">
       <form class="new-msg">
         <div class="input-group">
             <input class="form-control" type="text"
@@ -96,6 +95,7 @@ export default {
             messages.push(cryptMsg.decipherMessage(result));
           }
           this.messages = messages;
+          // this.panelScrollDown();
       });
     },
     addMsg(e) {
@@ -116,6 +116,9 @@ export default {
     },
     toggleMembers() {
       this.isMembersVisible = !this.isMembersVisible;
+    // },
+    // panelScrollDown () {
+    //   document.querySelector('.floating-panel-body').scrollHeight();
     }
   }
 }
@@ -123,56 +126,5 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-  $user-color: #000;
-  $friend-color: #00f;
-  $chat-background: #abc;
 
-  .group-name {
-    text-align: center;
-    font-size: large;
-
-    a {
-      color: black;
-    }
-  }
-
-  .chat-panel {
-    padding: 10px;
-  }
-  .chat-panel-body {
-    height: 70vh;
-    text-overflow: clip;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-
-  .member-list {
-    list-style: none;
-    background-color: lighten($chat-background, 10%);
-    border-radius: 10px;
-  }
-
-  .message {
-    text-align: left;
-    color: $user-color;
-
-    .timestamp {
-      font-size: x-small;
-      color: lighten($user-color, 10%);
-    }
-
-    .message-body {
-
-    }
-  }
-
-  .msgFromOther {
-    text-align: right;
-    color: $friend-color;
-
-    .timestamp {
-      font-size: x-small;
-      color: lighten($friend-color, 10%);
-    }
-  }
 </style>

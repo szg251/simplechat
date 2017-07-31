@@ -1,32 +1,34 @@
 <template lang="html">
-  <div>
-    <chat :currentUser="currentUser"></chat>
-    <h2>Friend requests</h2>
-    <ul>
-      <li v-for="(friend, i) in friendReqs" :id="'friendReq' + i" :key="'friendReq' +　i">{{friend}}
-        <a class="btn btn-default" @click="approveReq">Approve</a>
-        <a class="btn btn-default" @click="declineReq">Reject</a>
-      </li>
-    </ul>
-    <h2>Pending requests</h2>
-    <ul>
-      <li v-for="(friend, i) in pendingReqs" :id="'pendingReq' + i" :key="'pendingReq' +　i">{{friend}}
-        <a class="btn btn-default" @click="cancelReq">Cancel</a>
-      </li>
-    </ul>
-    <form>
-      <div class="form-group">
-        <input class="form-control" type="text" v-model="newFriend">
-      </div>
-      <input type="submit" class="btn btn-primary" v-on:click="sendReq">
-    </form>
+  <div class="container">
+    <div class="col-md-4 col-md-offset-1 well">
+      <h2>Friend requests</h2>
+      <ul>
+        <li v-for="(friend, i) in friendReqs" :id="'friendReq' + i" :key="'friendReq' +　i">{{friend}}
+          <a class="btn btn-default" @click="approveReq">Approve</a>
+          <a class="btn btn-default" @click="declineReq">Reject</a>
+        </li>
+      </ul>
+    </div>
+    <div class="col-md-4 col-md-offset-1 well">
+      <h2>Pending requests</h2>
+      <ul>
+        <li v-for="(friend, i) in pendingReqs" :id="'pendingReq' + i" :key="'pendingReq' +　i">{{friend}}
+          <a class="btn btn-default" @click="cancelReq">Cancel</a>
+        </li>
+      </ul>
+      <form>
+        <div class="form-group">
+          <input class="form-control" type="text" v-model="newFriend">
+        </div>
+        <input type="submit" class="btn btn-primary" v-on:click="sendReq">
+      </form>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
 import routes from '../../../config/routes'
-import Chat from '../Chat'
 
 export default {
   name: 'friend-requests',
@@ -47,9 +49,6 @@ export default {
     currentUser: function() {
       this.getUserData();
     }
-  },
-  components: {
-    Chat
   },
   methods: {
     sendReq: function(e) {
