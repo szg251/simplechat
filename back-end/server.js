@@ -51,7 +51,8 @@ db.on('error', function(err) {
  **/
 
 //Filters
-// app.all('/user*', filters.userFilter);
+app.all('*', filters.loggerFilter);
+
 app.all('/group*', filters.userFilter);
 app.all('/user/:userId*', filters.userParamFilter);
 app.all('/group/:group*', filters.groupFilter);

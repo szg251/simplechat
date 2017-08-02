@@ -48,6 +48,7 @@ export default {
     return {
       newMsg: '',
       messages: [],
+      reachedTop: false,
       isChatVisible: true,
       isMembersVisible: false,
       sessionId: '',
@@ -75,28 +76,38 @@ export default {
 
     socket.on('newMsg', (message) => {
       this.messages.push(cryptMsg.decipherMessage(message));
+      this.panelScrollDown();
     });
     if (this.currentGroup != '') {
       this.getGroupData();
     }
   },
+  mounted() {
+      document.querySelector('.floating-panel-body').addEventListener('scroll', this.onScroll);
+  },
   methods: {
-    getGroupData() {
+    getGroupData(skip) {
       axios.get(routes.apiRoutes.getGroup(this.currentGroup))
         .then(response => {
           this.groupName = response.data.group.name,
           this.members = response.data.group.members
       });
 
-      axios.get(routes.apiRoutes.getMessages(this.currentGroup))
+      this.getMessages(0, true)
+    },
+    getMessages(skip, scrollDown) {
+      axios.get(routes.apiRoutes.getMessages(this.currentGroup), {params: {skip: skip}})
         .then(response => {
           var messages = [];
           for (var result of response.data.messages) {
             messages.push(cryptMsg.decipherMessage(result));
           }
-          this.messages = messages;
-          // this.panelScrollDown();
-      });
+          this.messages = messages.concat(this.messages);
+          this.reachedTop = response.data.reachedTop;
+          if (scrollDown) {
+            this.panelScrollDown();
+          }
+      })
     },
     addMsg(e) {
       e.preventDefault();
@@ -110,18 +121,29 @@ export default {
       this.messages.push(newMsg);
       socket.emit('message from client', cryptMsg.cipherMessage(newMsg));
       this.newMsg = '';
+      this.panelScrollDown();
     },
     toggleChat() {
       this.isChatVisible = !this.isChatVisible;
     },
     toggleMembers() {
       this.isMembersVisible = !this.isMembersVisible;
-    // },
-    // panelScrollDown () {
-    //   document.querySelector('.floating-panel-body').scrollHeight();
+    },
+    panelScrollDown () {
+      this.$nextTick(function() {
+        var chatPanel = document.querySelector('.floating-panel-body');
+        var height = chatPanel.scrollHeight;
+        chatPanel.scrollTop = height;
+      })
+    },
+    onScroll(e) {
+      if (e.target.scrollTop == 0 && !this.reachedTop) {
+        this.getMessages(this.messages.length);
+      }
     }
   }
 }
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

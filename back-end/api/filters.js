@@ -6,6 +6,15 @@ const sessions    = require('../session');
 const User        = require('../models/user');
 const Group        = require('../models/group');
 
+exports.loggerFilter = function(req, res) {
+  var user =　sessions.getUserId(req.cookies);
+  logger(req.method
+      + ' request received on '
+      +　req.originalUrl
+      + (user ? ' by ' + user : ''));
+  req.next();
+}
+
 exports.userFilter =　function(req, res) {
   logger('User authentication filter for: ' + req.originalUrl);
   if (req.cookies.sessionId == null || req.cookies.securityToken == null

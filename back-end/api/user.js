@@ -132,8 +132,6 @@ exports.changeUserInfo =　function(req, res) {
 }
 
 exports.getFriend =　function(req, res) {
-  logger('Friend information request.');
-
 // left join ($lookup) is not working in the current version of MongoDB (v2.6)
   User.aggregate(
     {$match: {_id: req.params.friendId}},
@@ -171,7 +169,6 @@ exports.getFriend =　function(req, res) {
  *  Other processes use these session credentials for authentication.
  */
 exports.login = function(req, res) {
-  logger('Login request by user: ' + req.body.userId);
   // If session exists, simply send it back
   var sessionCard = sessions.getByUserId(req.body.userId);
 
@@ -208,7 +205,6 @@ exports.login = function(req, res) {
 };
 
 exports.logout = function(req, res) {
-  logger('Logout request by ' +　req.params.userId);
   if (sessions.getUserId(req.cookies) != null
     && req.params.userId === sessions.getUserId(req.cookies)) {
     sessions.destroy(req.cookies);
@@ -228,7 +224,6 @@ exports.logout = function(req, res) {
  *  Sign up procedure
  */
 exports.signUp = function(req, res) {
-  logger('Signup request by ' + req.body.userId);
 
   if (!req.body.userId || !req.body.mail || !req.body.password) {
 
@@ -275,7 +270,6 @@ exports.signUp = function(req, res) {
 }
 
 exports.uploadUserImg = function(req, res) {
-  logger('Upload user image requested');
 
   if (req.file == null) {
       logger('Database error: ' + err);
@@ -304,7 +298,6 @@ exports.uploadUserImg = function(req, res) {
  *  Get groups of a user
  */
 exports.getGroups =　function(req, res) {
-  logger('Get groups request by ' + sessions.getUserId(req.cookies));
 
   Group.find({members: req.params.userId}, function(err, groups) {
     if (err) {
@@ -317,8 +310,6 @@ exports.getGroups =　function(req, res) {
 }
 
 exports.findUser = function(req, res) {
-  logger('Find userId request by ' + sessions.getUserId(req.cookies));
-  console.log(req.query);
 
   User.find({_id: new RegExp(req.query.userId, 'i')}, function(err, results) {
       var userIds = [];
@@ -330,7 +321,6 @@ exports.findUser = function(req, res) {
 }
 
 exports.getFriends = function(req, res) {
-  logger('Get friends request by ' + sessions.getUserId(req.cookies));
 
   User.aggregate([
     {$match: {'friends._userId': req.params.userId}},
@@ -349,7 +339,6 @@ exports.getFriends = function(req, res) {
 
 
 exports.findFriends = function(req, res) {
-  logger('Get friends request by ' + sessions.getUserId(req.cookies));
 
   User.aggregate([
     {$match: {_id: req.params.userId}},
@@ -375,7 +364,6 @@ exports.findFriends = function(req, res) {
 }
 
 exports.getFriendRequests = function(req, res) {
-  logger('Get friend requests requested by ' + sessions.getUserId(req.cookies));
 
   FriendReq.find({_requestee: req.params.userId})
     .exec((err, friendReqs) => {
@@ -391,7 +379,6 @@ exports.getFriendRequests = function(req, res) {
 
 
 exports.getMyFriendRequests = function(req, res) {
-  logger('Get my friend requests requested by ' + sessions.getUserId(req.cookies));
 
   FriendReq.find({_requester: req.params.userId})
     .exec((err, friendReqs) => {
@@ -406,7 +393,6 @@ exports.getMyFriendRequests = function(req, res) {
 }
 
 exports.sendFriendRequest = function(req, res) {
-  logger('Send friend request requested by ' +　sessions.getUserId(req.cookies));
 
   // Check if user exists
   User.findOne({_id: req.body.friendId})
@@ -468,7 +454,6 @@ exports.sendFriendRequest = function(req, res) {
 }
 
 exports.approveFriendRequest = function(req, res) {
-  logger('Friend request approve requested by ' + sessions.getUserId(req.cookies));
 
   FriendReq.findOneAndRemove({_requester: req.body.friendId, _requestee: req.params.userId})
     .exec((err, friendReq) => {
@@ -510,7 +495,6 @@ exports.approveFriendRequest = function(req, res) {
 }
 
 exports.cancelFriendRequest = function(req, res) {
-  logger('Cancel friend request requested by ' + sessions.getUserId(req.cookies));
 
   FriendReq.findOneAndRemove({_requester: req.params.userId, _requestee: req.body.friendId})
     .exec((err, friend) => {
@@ -527,9 +511,6 @@ exports.cancelFriendRequest = function(req, res) {
 
 // TODO rename to reject
 exports.declineFriendRequest = function(req, res) {
-  logger('Decline friend request requested by ' + sessions.getUserId(req.cookies));
-  console.log(req.params.userId)
-  console.log(req.body.friendId)
 
   FriendReq.findOneAndRemove({_requester: req.body.friendId, _requestee: req.params.userId})
     .exec((err, friend) => {

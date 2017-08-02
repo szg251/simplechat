@@ -19,20 +19,31 @@ exports.newMessage = function(req, res) {
 }
 
 exports.getMessages = function(req, res) {
-  logger('Get messages request by ' + sessions.getUserId(req.cookies));
-  Message.find({group: req.params.group}, function(err, messages) {
+  var skip  = req.query.skip ? parseInt(req.query.skip) : 0;
+  var limit = 4;
+  var reachedTop = false;
+  Message.aggregate(
+    { $match: { group: req.params.group }},
+    { $sort: {time: -1}},
+    { $skip: skip },
+    { $limit: limit },
+    { $sort: {time: 1}}
+  ).exec((err, messages) => {
     if (err) {
       logger('Database error: ' + err);
       res.status(500).json({success: false});
       return;
     }
 
-    res.json({success: true, messages: messages});
+    if (messages.length < limit) {
+      reachedTop = true;
+    }
+
+    res.json({success: true, messages: messages, reachedTop: reachedTop});
   });
 };
 
 exports.getGroup = function(req, res) {
-  logger('Get group request by ' + sessions.getUserId(req.cookies));
 
   Group.findOne({_id: req.params.group}, function(err, result) {
     if (err) {
@@ -45,39 +56,38 @@ exports.getGroup = function(req, res) {
 }
 
 exports.createGroup = function(req, res) {
-  logger('Group creation request.');
-  try {
-    for (member of req.body.members) {
 
-        User.count({_id: member}, function(err, result) {
-          if (err)
-            throw err;
+    User.count({_id: {$in: req.body.members}}).exec((err, result) => {
 
-          if (result == 0)
-            throw 'Not a valid userId';
-        })
-
-    }
-
-    var owner     = sessions.getUserId(req.cookies);
-    var members   = [owner].concat(req.body.members);
-    var newGroup  =　new Group({
-      name: req.body.name,
-      owner: owner,
-      members: members
-    });
-
-    newGroup.save(function(err) {
-      if (err) {
-        throw err;
-      } else {
-        res.json({success: true, newGroup: newGroup});
-        logger('Group successfully created.');
+      if (err){
+        logger('Database error: ' + err);
+        res.status(500).json({success: false, reason: 'Database error.'});
+        return;
       }
-    });
-  } catch(err) {
-    logger('Database error: ' + err);
-    res.status(500).json({succes: false, reason: 'Database error.'});
-    return;
-  }
+
+      if (result != req.body.members.length) {
+        logger('Invalid userId.');
+        res.status(400).json({success: false, reason: 'Invalid userId.'});
+        return;
+      }
+
+      var owner     = sessions.getUserId(req.cookies);
+      var members   = [owner].concat(req.body.members);
+      var newGroup  =　new Group({
+        name: req.body.name,
+        owner: owner,
+        members: members
+      });
+
+      newGroup.save(function(err) {
+        if (err) {
+          logger('Database error: ' + err);
+          res.status(500).json({success: false, reason: 'Database error.'});
+          return;
+        } else {
+          res.json({success: true, newGroup: newGroup});
+          logger('Group successfully created.');
+        }
+      })
+    })
 }
