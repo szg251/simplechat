@@ -7,9 +7,12 @@
         <li v-for="(member, i) in members" v-if="member != currentUser" :key="'member' + i">
           <router-link :to="'/user/friend/' + member">{{member}}</router-link>
         </li>
+        <a class="btn btn-default" href="#">Edit</a>
+        <a class="btn btn-danger" @click="deleteGroup">Delete</a>
       </ul>
     </div>
     <div class="floating-panel-body">
+      <div class="loading" v-if="isLoading">&nbsp;loading...</div>
       <div class="message" v-for="(message, i) in messages" :key="'message' + i"
           :class="{msgFromOther: message.user != currentUser}"  >
         <span class="timestamp">{{message.user}} - {{message.time}}</span>
@@ -21,7 +24,7 @@
       <form class="new-msg">
         <div class="input-group">
             <input class="form-control" type="text"
-              placeholder="Write some message..." v-model="newMsg">
+              placeholder="Write something..." v-model="newMsg">
             <span class="input-group-btn">
               <input class="btn btn-primary" type="submit"
                 value="Send" v-on:click="addMsg">
@@ -51,6 +54,7 @@ export default {
       reachedTop: false,
       isChatVisible: true,
       isMembersVisible: false,
+      isLoading: true,
       sessionId: '',
       securityToken: '',
       groupName: '',
@@ -93,9 +97,10 @@ export default {
           this.members = response.data.group.members
       });
 
-      this.getMessages(0, true)
+      this.getMessages(0)
     },
     getMessages(skip, scrollDown) {
+      this.isLoading = true;
       axios.get(routes.apiRoutes.getMessages(this.currentGroup), {params: {skip: skip}})
         .then(response => {
           var messages = [];
@@ -104,9 +109,8 @@ export default {
           }
           this.messages = messages.concat(this.messages);
           this.reachedTop = response.data.reachedTop;
-          if (scrollDown) {
-            this.panelScrollDown();
-          }
+          this.panelScrollDown();
+          this.isLoading = false;
       })
     },
     addMsg(e) {
@@ -115,13 +119,16 @@ export default {
         user: this.currentUser,
         group: this.currentGroup,
         text: this.newMsg,
-        time: new Date()
+        time: Date.now()
       }
 
       this.messages.push(newMsg);
       socket.emit('message from client', cryptMsg.cipherMessage(newMsg));
       this.newMsg = '';
       this.panelScrollDown();
+    },
+    deleteGroup() {
+
     },
     toggleChat() {
       this.isChatVisible = !this.isChatVisible;
@@ -130,10 +137,11 @@ export default {
       this.isMembersVisible = !this.isMembersVisible;
     },
     panelScrollDown () {
+      var chatPanel = document.querySelector('.floating-panel-body');
+      var currentHeight = chatPanel.scrollHeight;
       this.$nextTick(function() {
-        var chatPanel = document.querySelector('.floating-panel-body');
         var height = chatPanel.scrollHeight;
-        chatPanel.scrollTop = height;
+        chatPanel.scrollTop = height - currentHeight;
       })
     },
     onScroll(e) {
@@ -148,5 +156,8 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-
+  .loading {
+    text-align: center;
+    font-style: italic;
+  }
 </style>

@@ -45,7 +45,9 @@ exports.getMessages = function(req, res) {
 
 exports.getGroup = function(req, res) {
 
-  Group.findOne({_id: req.params.group}, function(err, result) {
+  Group.findOne(
+    { $and: [ { _id: req.params.group }, {deleteFlag: false} ]
+  }).exec((err, result) => {
     if (err) {
       logger('Database error: ' + err);
       res.status(500).json({success: false});
@@ -90,4 +92,72 @@ exports.createGroup = function(req, res) {
         }
       })
     })
+}
+
+exports.changeGroup = function(req, res) {
+
+  Group.findOne(
+    { $and: [ { _id: req.params.group }, {deleteFlag: false} ]
+  }).exec((err, group) => {
+
+    var owner = sessions.getUserId(req.cookies);
+
+    if (group.owner != owner) {
+      logger('Unathorized.');
+      res.status(400).json({success: false, reason: 'Unathorized'});
+      return;
+    }
+
+    User.count({_id: {$in: req.body.members}}).exec((err, result) => {
+
+      if (err){
+        logger('Database error: ' + err);
+        res.status(500).json({success: false, reason: 'Database error.'});
+        return;
+      }
+
+      if (result != req.body.members.length) {
+        logger('Invalid userId.');
+        res.status(400).json({success: false, reason: 'Invalid userId.'});
+        return;
+      }
+
+      group.members = [owner].concat(req.body.members);
+      group.name = req.body.name;
+      group.save(function(err) {
+        if (err) {
+          logger('Database error: ' + err);
+          res.status(500).json({success: false, reason: 'Database error.'});
+          return;
+        } else {
+          res.json({success: true, group: group});
+          logger('Group successfully created.');
+        }
+      })
+    })
+
+  })
+}
+
+exports.deleteGroup = function(req, res) {
+
+  Group.findOne({_id: req.params.group}).exec((err, group) => {
+    if (err){
+      logger('Database error: ' + err);
+      res.status(500).json({success: false, reason: 'Database error.'});
+      return;
+    }
+
+    Message.find({group: req.params.group}).remove().exec(err => {
+      if (err){
+        logger('Database error: ' + err);
+        res.status(500).json({success: false, reason: 'Database error.'});
+        return;
+      }
+
+      group.deleteFlag = true;
+      group.save();
+      res.status(200).json({success: true});
+    })
+  })
 }

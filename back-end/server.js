@@ -83,6 +83,8 @@ app.get('/finduser', userApi.findUser);
 
 // Group API
 app.get('/group/:group', groupApi.getGroup);
+app.post('/group/:group', groupApi.changeGroup);
+app.delete('/group/:group', groupApi.deleteGroup);
 app.get('/group/:group/messages', groupApi.getMessages);
 app.put('/group/:group/messages', groupApi.newMessage);
 app.put('/group', groupApi.createGroup);

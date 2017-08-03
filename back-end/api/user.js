@@ -299,7 +299,7 @@ exports.uploadUserImg = function(req, res) {
  */
 exports.getGroups =　function(req, res) {
 
-  Group.find({members: req.params.userId}, function(err, groups) {
+  Group.find({$and: [{members: req.params.userId}, {deleteFlag: false}]}).exec((err, groups) => {
     if (err) {
       logger('Database error: ' + err);
       res.status(500).json({success: false});
