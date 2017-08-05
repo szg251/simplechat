@@ -1,7 +1,7 @@
 {
-  "name": "vueapp-backend",
+  "name": "simplechat-backend",
   "version": "1.0.0",
-  "description": "Vue application (back-end)",
+  "description": "Simple chat application (back-end)",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -35,15 +35,6 @@ const router = new VueRouter({
   routes
 })
 
-// const store = new Vuex.Store({
-//   state: {
-//     userInfo: 'info'
-//   },
-//   mutations: {
-//
-//   }
-// })
-
 /* eslint-disable no-new */
 new Vue({
   router,

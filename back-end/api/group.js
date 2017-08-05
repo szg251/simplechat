@@ -59,22 +59,21 @@ exports.getGroup = function(req, res) {
 
 exports.createGroup = function(req, res) {
 
-    User.count({_id: {$in: req.body.members}}).exec((err, result) => {
-
+  User.count({_id: {$in: [].concat(req.body.members)}})
+    .exec((err, result) => {
       if (err){
         logger('Database error: ' + err);
         res.status(500).json({success: false, reason: 'Database error.'});
         return;
       }
-
-      if (result != req.body.members.length) {
+      if (result != [].concat(req.body.members).length) {
         logger('Invalid userId.');
         res.status(400).json({success: false, reason: 'Invalid userId.'});
         return;
       }
 
       var owner     = sessions.getUserId(req.cookies);
-      var members   = [owner].concat(req.body.members);
+      var members   = [owner].concat(members);
       var newGroup  =　new Group({
         name: req.body.name,
         owner: owner,

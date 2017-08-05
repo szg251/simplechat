@@ -1,5 +1,5 @@
 <template>
-  <div class="col-md-offset-4 col-md-4 well">
+  <div class="col-md-offset-4 col-md-4">
     <profile-show v-if="!editMode" :userData="userData"></profile-show>
     <profile-edit v-else :userData="userData"></profile-edit>
   </div>

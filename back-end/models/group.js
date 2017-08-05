@@ -6,7 +6,7 @@ const groupSchema = new Schema({
   name: {type: String, required: true},
   owner: {type: String, ref: 'User'},
   members: [{type: String, ref: 'User'}],
-  deleteFlag: false
+  deleteFlag: {type: Boolean, default: false}
 });
 
 var Group = mongoose.model('group', groupSchema);

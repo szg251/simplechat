@@ -1,7 +1,7 @@
 {
-  "name": "vueapp-frontend",
+  "name": "simplechat-frontend",
   "version": "1.0.0",
-  "description": "Vue application (front-end)",
+  "description": "Simple chat application (front-end)",
   "author": "Szabo Gergely",
   "license": "MIT",
   "scripts": {

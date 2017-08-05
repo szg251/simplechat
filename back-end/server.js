@@ -29,7 +29,7 @@ const storage       = multer.diskStorage({
 const upload        = multer({storage: storage});
 
 
-app.use(cors({credentials: true, origin: 'http://localhost:3333'}));
+app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -57,11 +57,16 @@ app.all('/group*', filters.userFilter);
 app.all('/user/:userId*', filters.userParamFilter);
 app.all('/group/:group*', filters.groupFilter);
 
-// User API
+// Login and Signup
 app.post('/login', userApi.login);
 app.post('/signup', userApi.signUp);
 app.put('/user/:userId/userimg', upload.single('userImg'), userApi.uploadUserImg);
+app.get('/user/:userId/logout', userApi.logout);
+app.get('/user/:userId/groups', userApi.getGroups);
+app.post('/userexists', userApi.userExists);
+app.get('/finduser', userApi.findUser);
 
+// User related
 app.get('/user', userApi.authenticateUser);
 app.get('/user/:userId', userApi.getUser);
 app.post('/user/:userId', userApi.changeUserInfo);
@@ -69,6 +74,7 @@ app.get('/user/:userId/friends', userApi.findFriends);
 app.get('/user/:userId/friend/:friendId', userApi.getFriend);
 app.get('/user/:userId/friends/all', userApi.getFriends);
 
+// Friend related
 app.get('/user/:userId/friendreqs', userApi.getFriendRequests);
 app.get('/user/:userId/myfriendreqs', userApi.getMyFriendRequests);
 app.put('/user/:userId/friendreqs', userApi.sendFriendRequest);
@@ -76,12 +82,7 @@ app.delete('/user/:userId/friendreqs', userApi.cancelFriendRequest);
 app.delete('/user/:userId/declinefriendreq', userApi.declineFriendRequest);
 app.post('/user/:userId/approvefriendreq', userApi.approveFriendRequest);
 
-app.get('/user/:userId/logout', userApi.logout);
-app.get('/user/:userId/groups', userApi.getGroups);
-app.post('/userexists', userApi.userExists);
-app.get('/finduser', userApi.findUser);
-
-// Group API
+// Group related
 app.get('/group/:group', groupApi.getGroup);
 app.post('/group/:group', groupApi.changeGroup);
 app.delete('/group/:group', groupApi.deleteGroup);
