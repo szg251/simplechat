@@ -1,28 +1,35 @@
 
 // Dependencies
-const logger    = require('./logger');
-const sessions  = require('./session');
+const logger        = require('./logger');
+const sessions      = require('./session');
+const cookieParser  = require('socket.io-cookie-parser');
+const Group         = require('./models/group');
+const Message       = require('./models/message');
 
 // Procedures
-const groupProc = require('./procedures/group');
+const groupProc     = require('./procedures/group');
 
 module.exports = exports = SocketStart;
 
 function SocketStart(io) {
 
+  io.use(cookieParser());
   io.sockets.on('connection', onConnect)
 
   function onConnect(socket) {
-    logger('Socket connection request.');
-    var valid = sessions.exists({
-      sessionId: socket.handshake.query.sessionId,
-      securityToken: socket.handshake.query.securityToken
+    var userId = sessions.getUserId({
+      sessionId: socket.request.cookies.sessionId,
+      securityToken: socket.request.cookies.securityToken
     });
-    // if (!valid) {
-    //   socket.disconnect(true);
-    //   logger('Socket connection request refused.');
-    //   return;
-    // }
+
+    logger('Socket connection request by ' + userId);
+
+    if (!userId) {
+      logger('Socket connection refused.');
+      socket.disconnect();
+      return;
+    }
+
     logger('Socket connected: ' + socket.id);
     socket.on('disconnect', onDisconnect);
     socket.on('message from client', onMsgFromClient);
@@ -34,14 +41,30 @@ function SocketStart(io) {
     logger('Socket disconnected: ' + this.id);
   }
 
-// TODO ISSUE cannot reach this function
-  function onMsgFromClient(data) {
+  function onMsgFromClient(messageData) {
     logger('Socket message from client.');
-    groupProc.newMessage(data);
-    this.broadcast.to(data.group).emit('newMsg', data);
+    var message = new Message({
+        user: messageData.user,
+        group: messageData.group,
+        text: messageData.text,
+    });
+    message.save();
+    this.broadcast.to(messageData.group).emit('newMsg', messageData);
   }
 
   function onJoinGroup(group) {
+    logger('Group authentication filter for socket ' + this.id);
+    Group.count({_id: group, members: sessions.getUserId(this.request.cookies)})
+      .exec((err, result) => {
+
+      if (err) {
+        logger('Database error: ' + err);
+        return;
+      } else if (result === 0) {
+        logger('Unauthorized');
+        return;
+      }
+    });
     this.join(group);
     logger(this.id + ' joined group ' + group);
   }

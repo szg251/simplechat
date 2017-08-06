@@ -15,7 +15,12 @@ const cipherKey = 'temporary';
 
 
 exports.newMessage = function(req, res) {
-  groupProc.newMessage(req.body.message);
+  var message = new Message({
+      user: req.body.message.user,
+      group: req.body.message.group,
+      text: req.body.message.text,
+  });
+  message.save();
 }
 
 exports.getMessages = function(req, res) {

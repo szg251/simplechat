@@ -20,7 +20,7 @@
         <div class="message"
             v-for="(message, i) in messages" :key="'message' + i"
             :class="{msgFromOther: message.user != currentUser}"  >
-          <div class="timestamp">{{message.time | dateFormatter}}</div>
+          <div class="timestamp" v-if="message.showTime">{{message.time | dateFormatter}}</div>
           <div class="namestamp">{{message.user}}</div>
           <div class="message-body">{{message.text}}</div>
         </div>
@@ -81,6 +81,17 @@ export default {
       if (this.isOpen) {
         this.onOpen();
       }
+    },
+    messages() {
+      this.messages[0].showTime = true;
+      for (var i = 1; i < this.messages.length; i++) {
+        if ( this.messages[i].showTime == null ) {
+          var newMsg = new Date(this.messages[i].time);
+          var oldMsg = new Date(this.messages[i-1].time);
+
+          this.messages[i].showTime = (oldMsg.getTime() < newMsg.getTime() - 60000);
+        }
+      }
     }
   },
   filters: {
@@ -93,7 +104,7 @@ export default {
 
         // today
         if (test < date) {
-          return moment(date).format('h:mm');
+          return moment(date).format('H:mm');
         }
 
         // day of week

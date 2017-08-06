@@ -6,8 +6,6 @@ const User        = require('../models/user');
 const Group       = require('../models/group');
 const Message     = require('../models/message');
 
-const cipherKey = "temporary";
-
 exports.newMessage = function(messageData) {
   var message = new Message({
       user: messageData.user,
