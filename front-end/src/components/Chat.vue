@@ -17,7 +17,7 @@
             </ul>
           </div>
           <div class="floating-panel-footer">
-            <a @click="toggleNewGroup" class="btn btn-default">Create a new group</a>
+            <a @click="toggleNewGroup" class="btn btn-default btn-sm">Create a new group</a>
           </div>
         </div>
       </div>
@@ -125,8 +125,8 @@ export default {
 
 <style lang="scss">
 
-  $user-color: #000;
-  $friend-color: #00f;
+  $user-color: #a4243b;
+  $friend-color: #363959;
   $chat-header-background: #abc;
   $chat-header-color: darken($chat-header-background, 60%);
   $group-list-hovered: lighten($chat-header-background, 20%);
@@ -190,12 +190,11 @@ export default {
     .floating-panel-body {
       position: absolute;
       padding: 10px;
-      height: 210px;
+      height: 220px;
       width: 100%;
       text-overflow: clip;
       overflow-y: auto;
       overflow-x: hidden;
-      // display: none;
     }
 
     .floating-panel-footer {
@@ -203,17 +202,30 @@ export default {
       bottom: 0px;
       padding: 10px;
       z-index: 100;
-      // display: none;
     }
   }
 
   .message {
     text-align: left;
     color: $user-color;
+    margin-top: 5px;
 
     .timestamp {
+      text-align: center;
       font-size: x-small;
       color: lighten($user-color, 10%);
+    }
+
+    .namestamp {
+      font-size: x-small;
+      color: lighten($user-color, 10%);
+    }
+
+    .message-body {
+      background-color: lighten($user-color, 50%);
+      padding: 3px 10px;
+      border-radius: 7px;
+      display: inline;
     }
   }
 
@@ -222,15 +234,22 @@ export default {
     color: $friend-color;
 
     .timestamp {
-      font-size: x-small;
       color: lighten($friend-color, 10%);
+    }
+
+    .namestamp {
+      color: lighten($friend-color, 10%);
+    }
+
+    .message-body {
+      background-color: lighten($friend-color, 50%);
     }
   }
 
   .group-list {
 
     .floating-panel-body {
-      padding: 0 !important;
+      padding: 0;
     }
 
     ul {

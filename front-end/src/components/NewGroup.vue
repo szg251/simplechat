@@ -30,8 +30,8 @@
           </div>
         </div>
         <div class="floating-panel-footer">
-            <input type="reset" class="btn btn-default" @click="cancel" value="Cancel">
-            <input type="submit" class="btn btn-primary" @click="submit" value="Create">
+            <input type="reset" class="btn btn-default btn-sm" @click="cancel" value="Cancel">
+            <input type="submit" class="btn btn-primary btn-sm" @click="submit" value="Create">
         </div>
       </form>
   </div>

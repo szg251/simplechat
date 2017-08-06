@@ -20,7 +20,7 @@ exports.newMessage = function(req, res) {
 
 exports.getMessages = function(req, res) {
   var skip  = req.query.skip ? parseInt(req.query.skip) : 0;
-  var limit = 4;
+  var limit = req.query.limit ? parseInt(req.query.limit) : 10;
   var reachedTop = false;
   Message.aggregate(
     { $match: { group: req.params.group }},

@@ -20,15 +20,15 @@
         <div class="message"
             v-for="(message, i) in messages" :key="'message' + i"
             :class="{msgFromOther: message.user != currentUser}"  >
-          <span class="timestamp">{{message.user}} - {{message.time | dateFormatter}}</span>
+          <div class="timestamp">{{message.time | dateFormatter}}</div>
+          <div class="namestamp">{{message.user}}</div>
           <div class="message-body">{{message.text}}</div>
-          <br/>
         </div>
       </div>
 
       <div class="floating-panel-footer">
         <form class="new-msg">
-          <div class="input-group">
+          <div class="input-group input-group-sm">
               <input class="form-control" type="text"
                 placeholder="Write something..." v-model="newMsg">
               <span class="input-group-btn">
@@ -49,7 +49,7 @@ import axios from 'axios'
 import routes from '../../config/routes'
 import io from 'socket.io-client'
 import cryptMsg from '../../security'
-import bus from './eventbus'
+import moment from 'moment'
 
 var socket;
 axios.defaults.withCredentials = true;
@@ -67,36 +67,43 @@ export default {
       sessionId: '',
       securityToken: '',
       groupName: '',
-      members: []
+      members: [],
+      scrollHeight: 0,
+      scrollPos: 0
     }
   },
   props: ['currentGroup', 'currentUser', 'isOpen'],
   watch: {
     currentGroup() {
       this.getGroupData();
+    },
+    isOpen() {
+      if (this.isOpen) {
+        this.onOpen();
+      }
     }
   },
   filters: {
       dateFormatter (value) {
         var date = new Date(value);
         var test = new Date();
-        var weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
         test.setHours(0);
         test.setMinutes(0);
         test.setSeconds(0);
 
         // today
         if (test < date) {
-          return date.getHours() + ':' + date.getMinutes();
+          return moment(date).format('h:mm');
         }
 
         // day of week
         test.setDate(test.getDate() - 6);
         if (test < date) {
-          return weekdays[date.getDay()] + " " + date.getHours() + ':' + date.getMinutes();
+          return moment(date).format('(ddd) h:mm');
         }
 
-        return date.toLocaleDateString() + ' ' + date.getHours() + ':' + date.getMinutes();
+        // older
+        return moment(date).format('YYYY/MM/DD h:mm');
       }
   },
   created() {
@@ -111,19 +118,33 @@ export default {
     socket.emit('join group', this.currentGroup);
 
     socket.on('newMsg', message => {
-      if (message.group == currentGroup) {
-        this.messages.push(cryptMsg.decipherMessage(message));
-        this.panelScrollDown();
-      }
-    });
+      this.messages.push(cryptMsg.decipherMessage(message));
+      this.panelScrollDown(true);
+    })
+
     if (this.currentGroup != '') {
       this.getGroupData();
     }
   },
   mounted() {
-      document.querySelector('.floating-panel-body').addEventListener('scroll', this.onScroll);
+    this.onOpen();
   },
   methods: {
+    onOpen () {
+      this.$nextTick(() => {
+        // setting the scroll position to the saved state
+        var chatPanel = document.querySelector('#chat-panel-' + this.currentGroup + ' .floating-panel-body');
+        chatPanel.scrollTop = this.scrollPos;
+        // creating an event listener which saves the current scroll state and fires
+        // an API call when the scroll is on the top
+        chatPanel.addEventListener('scroll', e => {
+          this.scrollPos = e.target.scrollTop;
+          if (this.scrollPos == 0 && !this.reachedTop) {
+            this.getMessages(this.messages.length);
+          }
+        });
+      })
+    },
     getGroupData(skip) {
       axios.get(routes.apiRoutes.getGroup(this.currentGroup))
         .then(response => {
@@ -133,8 +154,12 @@ export default {
 
       this.getMessages(0);
     },
+    // get messages from API
+    // only 10 messages are transferred, so we cat get
+    // the corresponding messages by the skip value
     getMessages(skip) {
       this.isLoading = true;
+
       axios.get(routes.apiRoutes.getMessages(this.currentGroup), {params: {skip: skip}})
         .then(response => {
           var messages = [];
@@ -163,7 +188,7 @@ export default {
       this.messages.push(newMsg);
       socket.emit('message from client', cryptMsg.cipherMessage(newMsg));
       this.newMsg = '';
-      this.panelScrollDown();
+      this.panelScrollDown(true, true);
     },
     toggleChat() {
       this.$emit('toggle-chat', this.currentGroup);
@@ -179,18 +204,18 @@ export default {
     hideMembers() {
       this.membersVisible = false;
     },
-    panelScrollDown () {
-      var chatPanel = document.querySelector('.floating-panel-body');
-      var currentHeight = chatPanel.scrollHeight;
+    panelScrollDown (toBottom, forced) {
       this.$nextTick(function() {
-        var height = chatPanel.scrollHeight;
-        chatPanel.scrollTop = height - currentHeight;
+        var chatPanel = document.querySelector('#chat-panel-' + this.currentGroup + ' .floating-panel-body');
+        var panelHeight = chatPanel.scrollHeight;
+
+        if (toBottom && ( forced || (chatPanel.scrollTop + chatPanel.clientHeight) == this.scrollHeight )) {
+          this.scrollPos = chatPanel.scrollTop = panelHeight;
+        } else if (!toBottom) {
+          this.scrollPos = chatPanel.scrollTop = panelHeight - this.scrollHeight;
+        }
+        this.scrollHeight = panelHeight;
       })
-    },
-    onScroll(e) {
-      if (e.target.scrollTop == 0 && !this.reachedTop) {
-        this.getMessages(this.messages.length);
-      }
     }
   }
 }
