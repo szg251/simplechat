@@ -49,7 +49,7 @@ function SocketStart(io) {
         text: messageData.text,
     });
     message.save();
-    this.broadcast.to(messageData.group).emit('newMsg', messageData);
+    this.broadcast.to(messageData.group).emit('newMsg', message);
   }
 
   function onJoinGroup(group) {

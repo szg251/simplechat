@@ -56,7 +56,7 @@ export default {
     },
     submitEdit(e) {
       e.preventDefault();
-      axios.post(routes.apiRoutes.changeUser(this.$props.userData.userId), {
+      axios.post(routes.apiRoutes.editUser(this.$props.userData.userId), {
         fullname: this.$props.userData.fullname,
         introduction: this.$props.userData.introduction,
         imageSrc: this.$props.userData.imageSrc

@@ -22,7 +22,7 @@ export default {
   name: 'friends',
   data() {
     return {
-      noAvatar: 'http://localhost:3333/static/noavatarn.png',
+      noAvatar: '/static/noavatarn.png',
       newFriend: '',
       friends: [],
       friendReqs: [],

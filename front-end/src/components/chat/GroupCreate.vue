@@ -39,10 +39,10 @@
 
 <script>
 import axios from 'axios'
-import routes from '../../config/routes'
+import routes from '../../../config/routes'
 
 export default {
-  name: 'new-group',
+  name: 'group-create',
   data() {
     return {
       groupName: '',
@@ -110,7 +110,7 @@ export default {
       }
     },
     cancel () {
-      this.$emit('close-newgroup');
+      this.$emit('close-groupcreate');
     },
     submit (e) {
       e.preventDefault();
@@ -136,7 +136,7 @@ export default {
           members: members
         }).then(result => {
           if (result.data.success) {
-            this.$emit('finish-newgroup', result.data.newGroup);
+            this.$emit('finish-groupcreate', result.data.newGroup);
           }
         });
       } else {

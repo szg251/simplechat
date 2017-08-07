@@ -2,12 +2,12 @@
   <div :class="{'panel-open' : isOpen}">
 
     <div class="floating-panel-header" @click="toggleChat">
-      <span @mouseover="showMembers" @mouseout="hideMembers">{{groupName}}</span>
+      <span @mouseover="showMembers" @mouseout="hideMembers">{{currentGroup.name}}</span>
       <span class="header-btn glyphicon glyphicon-remove" @click="closeChat" />
-      <span class="header-btn glyphicon glyphicon-cog" />
+      <span class="header-btn glyphicon glyphicon-cog" @click="editGroup" />
       <ul class="member-list" v-if="membersVisible">
         <li>Me</li>
-        <li v-for="(member, i) in members" v-if="member != currentUser" :key="'member' + i">
+        <li v-for="(member, i) in currentGroup.members" v-if="member != currentUser" :key="'member' + i">
           {{member}}
         </li>
       </ul>
@@ -46,9 +46,9 @@
 <script>
 
 import axios from 'axios'
-import routes from '../../config/routes'
+import routes from '../../../config/routes'
 import io from 'socket.io-client'
-import cryptMsg from '../../security'
+import cryptMsg from '../../../security'
 import moment from 'moment'
 
 var socket;
@@ -64,10 +64,6 @@ export default {
       chatVisible: true,
       membersVisible: false,
       isLoading: true,
-      sessionId: '',
-      securityToken: '',
-      groupName: '',
-      members: [],
       scrollHeight: 0,
       scrollPos: 0
     }
@@ -75,7 +71,7 @@ export default {
   props: ['currentGroup', 'currentUser', 'isOpen'],
   watch: {
     currentGroup() {
-      this.getGroupData();
+      this.getMessages(0);
     },
     isOpen() {
       if (this.isOpen) {
@@ -133,8 +129,8 @@ export default {
       this.panelScrollDown(true);
     })
 
-    if (this.currentGroup != '') {
-      this.getGroupData();
+    if (this.currentGroup._id != '') {
+      this.getMessages(0);
     }
   },
   mounted() {
@@ -144,7 +140,7 @@ export default {
     onOpen () {
       this.$nextTick(() => {
         // setting the scroll position to the saved state
-        var chatPanel = document.querySelector('#chat-panel-' + this.currentGroup + ' .floating-panel-body');
+        var chatPanel = document.querySelector('#chat-panel-' + this.currentGroup._id + ' .floating-panel-body');
         chatPanel.scrollTop = this.scrollPos;
         // creating an event listener which saves the current scroll state and fires
         // an API call when the scroll is on the top
@@ -156,22 +152,13 @@ export default {
         });
       })
     },
-    getGroupData(skip) {
-      axios.get(routes.apiRoutes.getGroup(this.currentGroup))
-        .then(response => {
-          this.groupName  = response.data.group.name,
-          this.members    = response.data.group.members
-      });
-
-      this.getMessages(0);
-    },
     // get messages from API
     // only 10 messages are transferred, so we cat get
     // the corresponding messages by the skip value
     getMessages(skip) {
       this.isLoading = true;
 
-      axios.get(routes.apiRoutes.getMessages(this.currentGroup), {params: {skip: skip}})
+      axios.get(routes.apiRoutes.getMessages(this.currentGroup._id), {params: {skip: skip}})
         .then(response => {
           var messages = [];
           for (var result of response.data.messages) {
@@ -191,7 +178,7 @@ export default {
 
       var newMsg = {
         user: this.currentUser,
-        group: this.currentGroup,
+        group: this.currentGroup._id,
         text: this.newMsg,
         time: Date.now()
       }
@@ -202,10 +189,13 @@ export default {
       this.panelScrollDown(true, true);
     },
     toggleChat() {
-      this.$emit('toggle-chat', this.currentGroup);
+      this.$emit('toggle-chat', this.currentGroup._id);
+    },
+    editGroup() {
+      this.$emit('edit-group', this.currentGroup._id);
     },
     closeChat() {
-      this.$emit('close-chat', this.currentGroup);
+      this.$emit('close-chat', this.currentGroup._id);
     },
     showMembers() {
       if (this.isOpen) {
@@ -217,7 +207,7 @@ export default {
     },
     panelScrollDown (toBottom, forced) {
       this.$nextTick(function() {
-        var chatPanel = document.querySelector('#chat-panel-' + this.currentGroup + ' .floating-panel-body');
+        var chatPanel = document.querySelector('#chat-panel-' + this.currentGroup._id + ' .floating-panel-body');
         var panelHeight = chatPanel.scrollHeight;
 
         if (toBottom && ( forced || (chatPanel.scrollTop + chatPanel.clientHeight) == this.scrollHeight )) {

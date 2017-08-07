@@ -17,7 +17,7 @@
             </ul>
           </div>
           <div class="floating-panel-footer">
-            <a @click="toggleNewGroup" class="btn btn-default btn-sm">Create a new group</a>
+            <a @click="toggleGroupCreate" class="btn btn-default btn-sm">Create a new group</a>
           </div>
         </div>
       </div>
@@ -26,16 +26,24 @@
           :key="'chat-panel-' + group._id"
           :id="'chat-panel-' + group._id"
           :isOpen="group.isOpen"
-          :currentGroup="group._id"
+          :currentGroup="group"
           :currentUser="currentUser"
+          @edit-group="openGroupEdit"
           @toggle-chat="toggleChat"
           @close-chat="closeChat" />
 
-      <new-group class="floating-panel panel-open"
-          v-if="showNewGroup"
+      <group-create class="floating-panel panel-open"
+          v-if="showGroupCreate"
           :currentUser="currentUser"
-          @close-newgroup="toggleNewGroup"
-          @finish-newgroup="finishNewGroup" />
+          @close-groupcreate="toggleGroupCreate"
+          @finish-groupcreate="finishGroupCreate" />
+
+      <group-edit class="floating-panel panel-open"
+          v-if="groupToEdit"
+          :currentUser="currentUser"
+          :currentGroup="groupToEdit"
+          @close-groupedit="closeGroupEdit"
+          @finish-groupedit="finishGroupEdit" />
     </div>
   </div>
 </template>
@@ -43,9 +51,10 @@
 <script>
 
 import axios from 'axios'
-import routes from '../../config/routes'
+import routes from '../../../config/routes'
 import ChatPanel from './ChatPanel'
-import NewGroup from './NewGroup'
+import GroupCreate from './GroupCreate'
+import GroupEdit from './GroupEdit'
 
 axios.defaults.withCredentials = true;
 
@@ -55,12 +64,13 @@ export default {
     return {
       groups: [],
       openGroups: [],
-      showNewGroup: false,
+      showGroupCreate: false,
+      groupToEdit: '',
       groupListOpen: false
     }
   },
   components: {
-    ChatPanel, NewGroup
+    ChatPanel, GroupCreate, GroupEdit
   },
   props: ['currentUser'],
   created () {
@@ -83,24 +93,22 @@ export default {
     },
     showGroup (e) {
       var groupId = e.target.id.slice(6, e.target.id.length);
-      var openGroupIndex = this.openGroups.findIndex(element => { return element._id == groupId });
-      if (openGroupIndex == -1) {
-        this.openGroups.push({
-          _id: groupId,
-          isOpen: true
-        })
+      var openGroup = this.openGroups.find(element => { return element._id == groupId });
+      var group = this.groups.find(element => { return element._id == groupId });
+      if (!openGroup) {
+        this.openGroups.push(Object.assign({isOpen: true}, group))
         if (this.openGroups.length > 3) {
           this.openGroups.splice(0, 1);
         }
       } else {
-        this.openGroups[openGroupIndex].isOpen = !this.openGroups[openGroupIndex].isOpen;
+        openGroup.isOpen = !openGroup.isOpen;
       }
     },
-    toggleNewGroup () {
-      this.showNewGroup = !this.showNewGroup;
+    toggleGroupCreate () {
+      this.showGroupCreate = !this.showGroupCreate;
     },
-    finishNewGroup (group) {
-      this.showNewGroup = false;
+    finishGroupCreate (group) {
+      this.showGroupCreate = false;
       this.groups.push(group);
       this.openGroups.push({
         _id: group._id,
@@ -111,13 +119,28 @@ export default {
       this.groupListOpen = !this.groupListOpen;
     },
     toggleChat (groupId) {
-      var openGroupIndex = this.openGroups.findIndex(element => { return element._id == groupId });
-      this.openGroups[openGroupIndex].isOpen = !this.openGroups[openGroupIndex].isOpen;
+      var openGroup = this.openGroups.find(element => { return element._id == groupId });
+      openGroup.isOpen = !openGroup.isOpen;
     },
     closeChat (groupId) {
       var openGroupIndex = this.openGroups.findIndex(element => { return element._id == groupId });
       this.openGroups.splice(openGroupIndex, 1);
     },
+    openGroupEdit (groupId) {
+      var groupToEdit = Object.assign({}, this.groups.find(element => { return element._id == groupId }));
+      groupToEdit.members = groupToEdit.members.map(member => { return { _id: member} } );
+      this.groupToEdit = groupToEdit;
+      this.closeChat(groupId);
+    },
+    closeGroupEdit(group) {
+      this.groupToEdit = '';
+      this.openGroups.push(Object.assign({isOpen: true}, group));
+    },
+    finishGroupEdit(group) {
+      var groupIndex = this.groups.findIndex(element => { return element._id == groupId });
+      this.groups[groupIndex] = group;
+      this.closeGroupEdit(group)
+    }
   }
 
 }
@@ -217,8 +240,7 @@ export default {
     }
 
     .namestamp {
-      font-size: x-small;
-      color: lighten($user-color, 10%);
+      display: none;
     }
 
     .message-body {
@@ -238,6 +260,8 @@ export default {
     }
 
     .namestamp {
+      font-size: x-small;
+      display: inherit;
       color: lighten($friend-color, 10%);
     }
 

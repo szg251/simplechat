@@ -3,9 +3,6 @@ const logger      = require('../logger');
 const sessions    = require('../session');
 const crypto      = require('crypto');
 
-// Procedures
-const groupProc   = require('../procedures/group');
-
 // Models
 const Group       = require('../models/group');
 const Message     = require('../models/message');

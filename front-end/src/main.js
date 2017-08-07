@@ -3,7 +3,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import App from './App'
-import Chat from './components/Chat'
 import SignUp from './components/user/SignUp'
 import Login from './components/user/Login'
 import Profile from './components/user/profile/Profile'
@@ -11,7 +10,6 @@ import Friends from './components/user/Friends'
 import FriendRequests from './components/user/FriendRequests'
 import Friend from './components/user/Friend'
 import MainPage from './components/MainPage'
-// import Vuex from 'vuex'
 
 Vue.config.productionTip = false
 
@@ -20,7 +18,6 @@ Vue.use(VueRouter)
 
 const routes = [
   {path: '/', component: MainPage},
-  {path: '/chat', component: Chat},
   {path: '/signup', component: SignUp},
   {path: '/login', component: Login},
   {path: '/user/friends', component: Friends},

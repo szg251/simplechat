@@ -23,7 +23,7 @@
 <script>
 import axios from 'axios';
 import routes from '../config/routes'
-import Chat from './components/Chat'
+import Chat from './components/chat/Chat'
 axios.defaults.withCredentials = true;
 
 export default {
