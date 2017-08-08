@@ -87,7 +87,13 @@ export default {
     getUserData () {
         axios.get(routes.apiRoutes.getGroups(this.currentUser))
           .then(response => {
-            this.groups = response.data.groups;
+            this.groups = response.data.groups.map(group => {
+                 group.members = group.members.map(member => {
+                   return { _id: member} 
+                 });
+                 return group;
+              })
+                  
           })
 
     },
@@ -110,10 +116,7 @@ export default {
     finishGroupCreate (group) {
       this.showGroupCreate = false;
       this.groups.push(group);
-      this.openGroups.push({
-        _id: group._id,
-        isOpen: true
-      });
+      this.openGroups.push(Object.assign({}, group));
     },
     toggleGroupList () {
       this.groupListOpen = !this.groupListOpen;
@@ -128,7 +131,6 @@ export default {
     },
     openGroupEdit (groupId) {
       var groupToEdit = Object.assign({}, this.groups.find(element => { return element._id == groupId }));
-      groupToEdit.members = groupToEdit.members.map(member => { return { _id: member} } );
       this.groupToEdit = groupToEdit;
       this.closeChat(groupId);
     },
@@ -137,7 +139,7 @@ export default {
       this.openGroups.push(Object.assign({isOpen: true}, group));
     },
     finishGroupEdit(group) {
-      var groupIndex = this.groups.findIndex(element => { return element._id == groupId });
+      var groupIndex = this.groups.findIndex(element => { return element._id == group._id });
       this.groups[groupIndex] = group;
       this.closeGroupEdit(group)
     }

@@ -7,8 +7,8 @@
       <span class="header-btn glyphicon glyphicon-cog" @click="editGroup" />
       <ul class="member-list" v-if="membersVisible">
         <li>Me</li>
-        <li v-for="(member, i) in currentGroup.members" v-if="member != currentUser" :key="'member' + i">
-          {{member}}
+        <li v-for="(member, i) in currentGroup.members" v-if="member._id != currentUser" :key="'member' + i">
+          {{member._id}}
         </li>
       </ul>
     </div>
@@ -79,6 +79,9 @@ export default {
       }
     },
     messages() {
+      if (this.messages.length == 0) {
+        return;
+      }
       this.messages[0].showTime = true;
       for (var i = 1; i < this.messages.length; i++) {
         if ( this.messages[i].showTime == null ) {

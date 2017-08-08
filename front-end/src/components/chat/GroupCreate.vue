@@ -15,7 +15,7 @@
             <div class="input-group input-group-sm" v-for="(member, i) in members" :key="'member' + i">
               <input type="text" :id="'member' + i" list="userIds" class="form-control"
                   placeholder="Member" autocomplete="off"
-                  v-model="member.user"
+                  v-model="member._id"
                   @keyup="memberLookup"
                   @change="checkMember">
               <span class="input-group-btn">
@@ -46,7 +46,7 @@ export default {
   data() {
     return {
       groupName: '',
-      members: [{user: ''}],
+      members: [{_id: ''}],
       friends: [],
       errors: {
         noGroupName: false,
@@ -69,8 +69,8 @@ export default {
         })
 
       // Create a new member input field
-      if (this.members[this.members.length-1].user !== ''){
-        this.members.push({user: ''})
+      if (this.members[this.members.length-1]._id !== ''){
+        this.members.push({_id: ''})
       }
     },
     checkGroupName () {
@@ -121,12 +121,12 @@ export default {
       var members = [];
       for (var i = 0; i < this.members.length; i++) {
         var isInvalid = members.some(element => {
-          return !this.members[i].user
-              || this.members[i].user == this.currentUser
-              || element == this.members[i].user;
+          return !this.members[i]._id
+              || this.members[i]._id == this.currentUser
+              || element == this.members[i]._id;
         })
         if (!isInvalid) {
-            members.push(this.members[i].user);
+            members.push(this.members[i]._id);
         }
       }
 
@@ -136,7 +136,9 @@ export default {
           members: members
         }).then(result => {
           if (result.data.success) {
-            this.$emit('finish-groupcreate', result.data.newGroup);
+            var newGroup = result.data.newGroup.members
+              .map(member => { return {_id: member} })
+            this.$emit('finish-groupcreate', newGroup);
           }
         });
       } else {
