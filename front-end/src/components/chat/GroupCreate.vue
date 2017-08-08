@@ -3,7 +3,7 @@
     <form>
       <div class="floating-panel-header">
         <input type="text" class="panel-header-input" placeholder="New group"
-            v-model="groupName"
+            v-model="currentGroup.name"
             @change="checkGroupName">
         <span class="header-btn glyphicon glyphicon-remove" @click="cancel" />
       </div>
@@ -12,7 +12,7 @@
             <div class="alert alert-danger" v-if="errors.noGroupName">You must input a group name</div>
             <div class="alert alert-danger" v-if="errors.noMembers">You must input at least one member</div>
             <div class="alert alert-danger" v-if="errors.invalidMember">UserId doesn't exist</div>
-            <div class="input-group input-group-sm" v-for="(member, i) in members" :key="'member' + i">
+            <div class="input-group input-group-sm" v-for="(member, i) in currentGroup.members" :key="'member' + i">
               <input type="text" :id="'member' + i" list="userIds" class="form-control"
                   placeholder="Member" autocomplete="off"
                   v-model="member._id"
@@ -45,8 +45,10 @@ export default {
   name: 'group-create',
   data() {
     return {
-      groupName: '',
-      members: [{_id: ''}],
+      currentGroup: {
+        name: '',
+        members: [{_id: ''}]
+      },
       friends: [],
       errors: {
         noGroupName: false,
@@ -69,12 +71,12 @@ export default {
         })
 
       // Create a new member input field
-      if (this.members[this.members.length-1]._id !== ''){
-        this.members.push({_id: ''})
+      if (this.currentGroup.members[this.currentGroup.members.length-1]._id !== ''){
+        this.currentGroup.members.push({_id: ''})
       }
     },
     checkGroupName () {
-      this.errors.noGroupName = !this.groupName
+      this.errors.noGroupName = !this.currentGroup.name
     },
     checkMember (e) {
       if (e.target.value === '') {
@@ -117,28 +119,19 @@ export default {
       if (this.errors.invalidMember || this.errors.noMembers || this.errors.noGroupName) {
         return;
       }
+      var group = this.currentGroup;
+      group.members = group.members.filter((member, i, members) => {
+        return member._id
+            && member._id != this.currentUser
+            && (i == 0 || !members.slice(0, i).some(compare => { return compare._id == member._id}));
+      }).map(member => { return member._id });
 
-      var members = [];
-      for (var i = 0; i < this.members.length; i++) {
-        var isInvalid = members.some(element => {
-          return !this.members[i]._id
-              || this.members[i]._id == this.currentUser
-              || element == this.members[i]._id;
-        })
-        if (!isInvalid) {
-            members.push(this.members[i]._id);
-        }
-      }
-
-      if (members.length > 0) {
-        axios.put(routes.apiRoutes.createGroup, {
-          name: this.groupName,
-          members: members
-        }).then(result => {
+      if (group.members.length > 0) {
+        axios.put(routes.apiRoutes.createGroup, group).then(result => {
           if (result.data.success) {
-            var newGroup = result.data.newGroup.members
-              .map(member => { return {_id: member} })
-            this.$emit('finish-groupcreate', newGroup);
+            result.data.newGroup.members = result.data.newGroup.members
+                .map(member => { return {_id: member} })
+            this.$emit('finish-groupcreate', result.data.newGroup);
           }
         });
       } else {

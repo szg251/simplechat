@@ -73,8 +73,8 @@ export default {
         })
 
       // Create a new member input field
-      if (this.currentGroup.members[this.currentGroup.members.length-1].user !== ''){
-        this.currentGroup.members.push({user: ''})
+      if (this.currentGroup.members[this.currentGroup.members.length-1]._id !== ''){
+        this.currentGroup.members.push({_id: ''})
       }
     },
     checkGroupName () {
@@ -125,23 +125,20 @@ export default {
         return;
       }
 
-      var members = [];
-      for (var i = 0; i < this.currentGroup.members.length; i++) {
-        var isInvalid = members.some(element => {
-          return !this.currentGroup.members[i].user
-              || this.currentGroup.members[i].user == this.currentUser
-              || element == this.currentGroup.members[i].user;
-        })
-        if (!isInvalid) {
-            members.push(this.currentGroup.members[i].user);
-        }
-      }
+      var group = this.currentGroup;
+      group.members = this.currentGroup.members.filter((member, i, members) => {
+        return member._id
+            && member._id != this.currentUser
+            && (i == 0 || !members.slice(0, i).some(compare => { return compare._id === member._id}));
+      }).map(member => { return member._id });
 
-      if (members.length > 0) {
-        axios.post(routes.apiRoutes.editGroup(this.currentGroup._id), this.currentGroup)
+      if (group.members.length > 0) {
+        axios.post(routes.apiRoutes.editGroup(this.currentGroup._id), group)
           .then(result => {
           if (result.data.success) {
-            this.$emit('finish-groupedit', result.data.group);v
+            result.data.group = result.data.group.members
+                .map(member => { return {_id: member} });
+            this.$emit('finish-groupedit', result.data.group);
 
           }
         });

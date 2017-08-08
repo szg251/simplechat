@@ -75,11 +75,10 @@ exports.createGroup = function(req, res) {
       }
 
       var owner     = sessions.getUserId(req.cookies);
-      var members   = [owner].concat(members);
       var newGroup  =　new Group({
         name: req.body.name,
         owner: owner,
-        members: members
+        members: [owner].concat(req.body.members)
       });
 
       newGroup.save(function(err) {
