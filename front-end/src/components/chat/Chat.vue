@@ -42,6 +42,7 @@
           v-if="groupToEdit"
           :currentUser="currentUser"
           :currentGroup="groupToEdit"
+          @remove-group="removeGroup"
           @close-groupedit="closeGroupEdit"
           @finish-groupedit="finishGroupEdit" />
     </div>
@@ -89,11 +90,11 @@ export default {
           .then(response => {
             this.groups = response.data.groups.map(group => {
                  group.members = group.members.map(member => {
-                   return { _id: member} 
+                   return { _id: member}
                  });
                  return group;
               })
-                  
+
           })
 
     },
@@ -102,7 +103,7 @@ export default {
       var openGroup = this.openGroups.find(element => { return element._id == groupId });
       var group = this.groups.find(element => { return element._id == groupId });
       if (!openGroup) {
-        this.openGroups.push(Object.assign({isOpen: true}, group))
+        this.openGroups.push(Object.assign({isOpen: true}, group));
         if (this.openGroups.length > 3) {
           this.openGroups.splice(0, 1);
         }
@@ -116,7 +117,10 @@ export default {
     finishGroupCreate (group) {
       this.showGroupCreate = false;
       this.groups.push(group);
-      this.openGroups.push(Object.assign({}, group));
+      this.openGroups.push(Object.assign({isOpen: true}, group));
+      if (this.openGroups.length > 3) {
+        this.openGroups.splice(0, 1);
+      }
     },
     toggleGroupList () {
       this.groupListOpen = !this.groupListOpen;
@@ -137,6 +141,18 @@ export default {
     closeGroupEdit(group) {
       this.groupToEdit = '';
       this.openGroups.push(Object.assign({isOpen: true}, group));
+      if (this.openGroups.length > 3) {
+        this.openGroups.splice(0, 1);
+      }
+    },
+    removeGroup(groupId) {
+      this.groupToEdit = '';
+      var groupIndex = this.groups.findIndex(element => { return element._id == groupId });
+      var openGroupIndex = this.openGroups.findIndex(element => { return element._id == groupId });
+      this.groups.splice(groupIndex, 1);
+      if (openGroupIndex != -1) {
+          this.openGroups.splice(openGroupIndex, 1);
+      }
     },
     finishGroupEdit(group) {
       var groupIndex = this.groups.findIndex(element => { return element._id == group._id });

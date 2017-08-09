@@ -28,7 +28,7 @@ module.exports =　exports = {
     declineFriendRequest: userId  => {return backEndServer + '/user/' + userId + '/declinefriendreq'},
 
     createGroup:        backEndServer + '/group',
-    editGroup:        group   => {return backEndServer + '/group/' + group},
+    editGroup:          group   => {return backEndServer + '/group/' + group},
     deleteGroup:        group   => {return backEndServer + '/group/' + group},
     getGroups:          userId  => {return backEndServer + '/user/' + userId + '/groups'},
     getGroup:           group   => {return backEndServer + '/group/' + group},

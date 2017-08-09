@@ -114,7 +114,8 @@ export default {
       }
     },
     remove () {
-
+      axios.delete(routes.apiRoutes.deleteGroup(this.currentGroup._id));
+      this.$emit('remove-group', this.currentGroup._id);
     },
     cancel () {
       this.$emit('close-groupedit', this.currentGroup);
@@ -136,7 +137,7 @@ export default {
         axios.post(routes.apiRoutes.editGroup(this.currentGroup._id), group)
           .then(result => {
           if (result.data.success) {
-            result.data.group = result.data.group.members
+            result.data.group.members = result.data.group.members
                 .map(member => { return {_id: member} });
             this.$emit('finish-groupedit', result.data.group);
 
