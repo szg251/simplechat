@@ -21,7 +21,7 @@
             v-for="(message, i) in messages" :key="'message' + i"
             :class="{msgFromOther: message.user != currentUser}"  >
           <div class="timestamp" v-if="message.showTime">{{message.time | dateFormatter}}</div>
-          <div class="namestamp">{{message.user}}</div>
+          <div v-if="message.user != currentUser" class="namestamp">{{message.user}}</div>
           <div class="message-body">{{message.text}}</div>
         </div>
       </div>

@@ -67,7 +67,7 @@ export default {
       openGroups: [],
       showGroupCreate: false,
       groupToEdit: '',
-      groupListOpen: false
+      groupListOpen: true
     }
   },
   components: {
@@ -255,10 +255,6 @@ export default {
       text-align: center;
       font-size: x-small;
       color: lighten($user-color, 10%);
-    }
-
-    .namestamp {
-      display: none;
     }
 
     .message-body {
