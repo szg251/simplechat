@@ -148,6 +148,12 @@ exports.deleteGroup = function(req, res) {
       return;
     }
 
+    if (group.owner != sessions.getUserId(req.cookies)) {
+      logger('Unathorized.');
+      res.status(400).json({success: false, reason: 'Unathorized'});
+      return;
+    }
+
     Message.find({group: req.params.group}).remove().exec(err => {
       if (err){
         logger('Database error: ' + err);

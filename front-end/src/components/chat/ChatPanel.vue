@@ -4,7 +4,7 @@
     <div class="floating-panel-header" @click="toggleChat">
       <span @mouseover="showMembers" @mouseout="hideMembers">{{currentGroup.name}}</span>
       <span class="header-btn glyphicon glyphicon-remove" @click="closeChat" />
-      <span class="header-btn glyphicon glyphicon-cog" @click="editGroup" />
+      <span v-if="currentGroup.owner == currentUser" class="header-btn glyphicon glyphicon-cog" @click="editGroup" />
       <ul class="member-list" v-if="membersVisible">
         <li>Me</li>
         <li v-for="(member, i) in currentGroup.members" v-if="member._id != currentUser" :key="'member' + i">
