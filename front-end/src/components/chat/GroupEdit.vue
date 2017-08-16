@@ -41,6 +41,7 @@
 <script>
 import axios from 'axios'
 import routes from '../../../config/routes'
+import dialogBus from '../common/DialogBus'
 
 export default {
   name: 'group-edit',
@@ -114,8 +115,25 @@ export default {
       }
     },
     remove () {
-      axios.delete(routes.apiRoutes.deleteGroup(this.currentGroup._id));
-      this.$emit('remove-group', this.currentGroup._id);
+      dialogBus.$off('dialog-response');
+      dialogBus.$on('dialog-response', response => {
+        if (response.name == 'delete-group' && response.answer == 'yes') {
+          axios.delete(routes.apiRoutes.deleteGroup(this.currentGroup._id));
+          this.$emit('remove-group', this.currentGroup._id);
+        }
+      })
+      dialogBus.$emit('dialog-request', {
+        name: 'delete-group',
+        title: 'Confirm delete',
+        message: 'Are you sure?',
+        buttons: {
+          dangerYes: true,
+          no: true,
+          yes: false,
+          ok: false,
+          cancel: false
+        }
+      })
     },
     cancel () {
       this.$emit('close-groupedit', this.currentGroup);

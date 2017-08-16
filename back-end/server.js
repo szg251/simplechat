@@ -36,7 +36,7 @@ app.use(cookieParser());
 app.use(express.static('static'));
 
 // DB connection
-mongoose.connect('mongodb://localhost/vueapp', { useMongoClient: true });
+mongoose.connect('mongodb://localhost/simplechat', { useMongoClient: true });
 const db = mongoose.connection;
 
 db.once('open', function() {

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <dialog-box />
     <div class="nav navbar navbar-inverse">
       <div class="container">
         <router-link to="/"><div class="navbar-brand">{{title}}</div></router-link>
@@ -24,6 +25,7 @@
 import axios from 'axios';
 import routes from '../config/routes'
 import Chat from './components/chat/Chat'
+import DialogBox from './components/common/DialogBox'
 axios.defaults.withCredentials = true;
 
 export default {
@@ -32,7 +34,7 @@ export default {
     return {
       title: 'Chat application',
       currentUser: '',
-      isLoggedin: false,
+      isLoggedin: false
     }
   },
   methods: {
@@ -80,7 +82,7 @@ export default {
     }
   },
   components: {
-    Chat
+    Chat, DialogBox
   }
 }
 </script>
