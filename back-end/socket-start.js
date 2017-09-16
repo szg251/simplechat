@@ -6,9 +6,6 @@ const cookieParser  = require('socket.io-cookie-parser');
 const Group         = require('./models/group');
 const Message       = require('./models/message');
 
-// Procedures
-const groupProc     = require('./procedures/group');
-
 module.exports = exports = SocketStart;
 
 function SocketStart(io) {
@@ -65,8 +62,8 @@ function SocketStart(io) {
         return;
       }
     });
-    this.join(group);
-    logger(this.id + ' joined group ' + group);
+    this.join(group._id);
+    logger(this.id + ' joined group ' + group.name);
   }
 
 }
