@@ -5,7 +5,7 @@ const crypto      = require('crypto');
 
 // Models
 const User        = require('../models/user');
-const Upload        = require('../models/upload');
+const Upload      = require('../models/upload');
 const FriendReq   = require('../models/friendreq')
 const Group       = require('../models/group');
 

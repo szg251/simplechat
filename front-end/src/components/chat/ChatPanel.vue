@@ -45,11 +45,11 @@
 
 <script>
 
-import axios from 'axios'
-import routes from '../../../config/routes'
-import io from 'socket.io-client'
+import axios    from 'axios'
+import routes   from '../../../config/routes'
+import io       from 'socket.io-client'
 import cryptMsg from '../../../security'
-import moment from 'moment'
+import moment   from 'moment'
 
 var socket;
 axios.defaults.withCredentials = true;
