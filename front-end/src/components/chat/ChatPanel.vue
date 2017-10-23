@@ -21,7 +21,7 @@
             v-for="(message, i) in messages" :key="'message' + i"
             :class="{msgFromOther: message.user != currentUser}"  >
           <div class="timestamp" v-if="message.showTime">{{message.time | dateFormatter}}</div>
-          <div v-if="message.user != currentUser" class="namestamp">{{message.user}}</div>
+          <div v-if="message.user != currentUser && message.showUser" class="namestamp">{{message.user}}</div>
           <div class="message-body">{{message.text}}</div>
         </div>
       </div>
@@ -83,7 +83,7 @@ export default {
         return;
       }
       this.messages[0].showTime = true;
-      for (var i = 1; i < this.messages.length; i++) {
+      for (let i = 1; i < this.messages.length; i++) {
         if ( this.messages[i].showTime == null ) {
           var newMsg = new Date(this.messages[i].time);
           var oldMsg = new Date(this.messages[i-1].time);
@@ -91,12 +91,20 @@ export default {
           this.messages[i].showTime = (oldMsg.getTime() < newMsg.getTime() - 60000);
         }
       }
+      this.messages[0].showUser = true
+      for (let i = this.messages.length - 1; i > 0; i--) {
+        if (this.messages[i].user === this.messages[i - 1].user) {
+          this.messages[i].showUser = false
+        } else {
+          this.messages[i].showUser = true
+        }
+      } 
     }
   },
   filters: {
       dateFormatter (value) {
-        var date = new Date(value);
-        var test = new Date();
+        let date = new Date(value);
+        let test = new Date();
         test.setHours(0);
         test.setMinutes(0);
         test.setSeconds(0);

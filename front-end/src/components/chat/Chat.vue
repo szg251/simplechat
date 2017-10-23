@@ -261,7 +261,7 @@ export default {
       background-color: lighten($user-color, 50%);
       padding: 3px 10px;
       border-radius: 7px;
-      display: inline;
+      display: inline-block;
     }
   }
 
