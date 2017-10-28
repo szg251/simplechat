@@ -7,7 +7,7 @@ This is a simple chat application using node.js, Vue.js, Socket.IO and MongoDB. 
 I designed the app as two separate servers: a back-end server which provides a REST API, connecting to a MongoDB database. This communicates to a front-end server, which is built on Vue.js.
 
 ### Installation
-* Install MongoDB:
+* Install MongoDB 3.4:
 https://www.mongodb.com/
 * Clone the project: `git clone https://github.com/Gege251/simplechat`
 * Install back-end server dependencies:`cd simplechat/back-end`
