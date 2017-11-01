@@ -9,7 +9,6 @@ const cookieParser  = require('cookie-parser');
 const multer        = require('multer');
 
 // API functions
-const apiDesc       = require('./api/apidescription');
 const filters       = require('./api/filters');
 const userApi       = require('./api/user');
 const groupApi      = require('./api/group');
@@ -57,10 +56,6 @@ app.all('*', filters.loggerFilter);
 app.all('/group*', filters.userFilter);
 app.all('/user/:userId*', filters.userParamFilter);
 app.all('/group/:group*', filters.groupFilter);
-
-// Api description pages
-app.get('/', apiDesc.root);
-app.get('/api', apiDesc.getApi);
 
 // Login and Signup
 app.post('/login', userApi.login);
