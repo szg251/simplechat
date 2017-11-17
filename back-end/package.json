@@ -21,6 +21,7 @@
     "socket.io-cookie-parser": "^1.0.0"
   },
   "devDependencies": {
-    "eslint": "^4.8.0"
+    "eslint": "^4.8.0",
+    "nodemon": "^1.11.0"
   }
 }

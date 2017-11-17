@@ -12,7 +12,8 @@ https://www.mongodb.com/
 * Clone the project: `git clone https://github.com/Gege251/simplechat`
 * Install back-end server dependencies:`cd simplechat/back-end`
   `npm install`
-* Install front-end server dependencies (you might need to install bower first `npm install -g bower`): `cd ../front-end` `npm install` `bower install`
+* Install front-end server dependencies:`cd ../front-end`
+  `npm install`
 
 ### Running
 * Run back-end and and front-end in separate terminals:
