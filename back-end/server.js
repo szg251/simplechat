@@ -13,7 +13,7 @@ const filters       = require('./api/filters');
 const userApi       = require('./api/user');
 const groupApi      = require('./api/group');
 
-logger('Vueapp back-end server booting...');
+logger('Simplechat back-end server booting...');
 
 const app           = express();
 const storage       = multer.diskStorage({
@@ -28,15 +28,17 @@ const storage       = multer.diskStorage({
 })
 const upload        = multer({storage: storage});
 
-
-app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
+app.use(cors({
+  credentials: true,
+  origin: ['http://127.0.0.1:3000', 'http://localhost:3000']
+}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static('static'));
 
 // DB connection
-mongoose.connect('mongodb://localhost/simplechat', { useMongoClient: true });
+mongoose.connect('mongodb://mongodb/simplechat', { useMongoClient: true });
 const db = mongoose.connection;
 
 db.once('open', function() {

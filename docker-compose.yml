@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  mongodb:
+    image: mongo:3.4.10
+
+  backend:
+    build: ./back-end
+    depends_on:
+      - "mongodb"
+    volumes:
+      - ./back-end/api:/app/api
+    ports:
+      - 3001:3001
+
+  frontend:
+    build: ./front-end
+    volumes:
+      - ./front-end/src:/app/src
+    ports:
+      - 3000:3000

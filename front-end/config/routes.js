@@ -1,50 +1,9 @@
 // API routes
-const backend = 'http://localhost:3001';
+const backend = 'http://127.0.0.1:3001';
 
 module.exports = exports = {
   socketRoute: backend,
   apiRoute: backend,
-  // api: function(routeName, ...args) {
-  //   let apiRoutes = {
-  //       login:                '/login',
-  //       signup:               '/signup',
-  //       userExists:           '/userexists',
-  //       logout:               '/user/:userId/logout',
-  //
-  //       authenticateUser:     '/user',
-  //       getUser:              '/user/:userId',
-  //       editUser:             '/user/:userId',
-  //       uploadImg:            '/user/:userId/userimg',
-  //       findUser:             '/finduser',
-  //       findFriends:          '/user/:userId/friends',
-  //       getFriend:            '/user/:userId/friend/:friendId',
-  //       getFriends:           '/user/:userId/friends/all',
-  //
-  //       getFriendRequests:    '/user/:userId/friendreqs',
-  //       getMyFriendRequests:  '/user/:userId/myfriendreqs',
-  //       sendFriendRequest:    '/user/:userId/friendreqs',
-  //       deleteFriendRequest:  '/user/:userId/friendreqs',
-  //       approveFriendRequest: '/user/:userId/approvefriendreq',
-  //       cancelFriendRequest:  '/user/:userId/friendreqs',
-  //       declineFriendRequest: '/user/:userId/declinefriendreq',
-  //
-  //       createGroup:          '/group',
-  //       editGroup:            '/group/:group',
-  //       deleteGroup:          '/group/:group',
-  //       getGroups:            '/user/:userId/groups',
-  //       getGroup:             '/group/:group',
-  //       getMessages:          '/group/:group/messages'
-  //     }
-  //
-  //     let paramRe = /:([^\/]*)/g;
-  //     let route = routes[routeName];
-  //     let result:
-  //     let realPath;
-  //     while (result = paramRe.exec(route)) {
-  //       realPath
-  //     }
-  //
-  // },
   apiRoutes: {
     login:                backend + '/login',
     signup:               backend + '/signup',

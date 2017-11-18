@@ -14,7 +14,6 @@ import MainPage from './components/MainPage'
 Vue.config.productionTip = false
 
 Vue.use(VueRouter)
-// Vue.use(Vuex)
 
 const routes = [
   {path: '/', component: MainPage},
