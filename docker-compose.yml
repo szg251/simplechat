@@ -2,9 +2,11 @@ version: '3'
 
 services:
   mongodb:
-    image: mongo:3.4.10
+    image: nonoroazoro/rpi-mongo:latest
 
   backend:
+    environment:
+      - SERVER_ADDRESS=${SERVER_ADDRESS}
     build: ./back-end
     depends_on:
       - "mongodb"
@@ -14,8 +16,10 @@ services:
       - 3001:3001
 
   frontend:
+    environment:
+      - SERVER_ADDRESS=${SERVER_ADDRESS}
     build: ./front-end
     volumes:
       - ./front-end/src:/app/src
     ports:
-      - 3000:3000
+      - 80:80

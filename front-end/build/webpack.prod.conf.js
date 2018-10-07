@@ -90,7 +90,12 @@ var webpackConfig = merge(baseWebpackConfig, {
         to: config.build.assetsSubDirectory,
         ignore: ['.*']
       }
-    ])
+    ]),
+    new webpack.DefinePlugin({
+      'process.env': {
+          SERVER_ADDRESS: JSON.stringify(process.env.SERVER_ADDRESS)
+      }
+    })
   ]
 })
 

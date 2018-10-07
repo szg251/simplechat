@@ -27,10 +27,11 @@ const storage       = multer.diskStorage({
   }
 })
 const upload        = multer({storage: storage});
+const serverAddress = process.env.SERVER_ADDRESS;
 
 app.use(cors({
   credentials: true,
-  origin: ['http://127.0.0.1:3000', 'http://localhost:3000']
+  origin: [serverAddress]
 }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());

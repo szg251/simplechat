@@ -3,4 +3,4 @@ WORKDIR /app
 ADD . /app
 RUN yarn
 EXPOSE 80
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "serve"]

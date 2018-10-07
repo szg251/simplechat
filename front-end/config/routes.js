@@ -1,5 +1,6 @@
 // API routes
-const backend = 'http://127.0.0.1:3001';
+const serverAddress = process.env.SERVER_ADDRESS || 'http://localhost'
+const backend = serverAddress + ':3001'
 
 module.exports = exports = {
   socketRoute: backend,

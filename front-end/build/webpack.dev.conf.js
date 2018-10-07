@@ -30,6 +30,11 @@ module.exports = merge(baseWebpackConfig, {
       template: 'index.html',
       inject: true
     }),
-    new FriendlyErrorsPlugin()
+    new FriendlyErrorsPlugin(),
+    new webpack.DefinePlugin({
+      'process.env': {
+          SERVER_ADDRESS: JSON.stringify(process.env.SERVER_ADDRESS)
+      }
+    })
   ]
 })
